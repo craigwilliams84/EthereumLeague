@@ -12,7 +12,7 @@ contract('LeagueAggregate', function(accounts) {
     	});
     }).catch(function(err) {
     	console.log(err);
-    	done();
+    	done(err);
   	});
   });
 });
