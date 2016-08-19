@@ -1,25 +1,15 @@
-contract LeagueAggregate {
-    function isReferee(
-        uint leagueId, address potentialRefereeAddress) constant returns (bool) {}
-
-    
-    function isParticipant(
-        uint leagueId, uint participantId, address) constant returns (bool) {}
-
-    function addResult(uint leagueId, uint homeParticipantId, 
-        uint homeParticipantScore, uint awayParticipantId, uint awayParticipantScore) {}
-}
+import "LeagueAggregateI.sol";
 
 contract ResultAggregate {
     address owner;
     address[] administrators;
     mapping (uint => Result) results;
-    LeagueAggregate leagueAggregate;
+    LeagueAggregateI leagueAggregate;
     uint currentId = 0;
 
     function ResultAggregate(address leagueAggregateAddress) {
         owner = msg.sender;
-        leagueAggregate = LeagueAggregate(leagueAggregateAddress);
+        leagueAggregate = LeagueAggregateI(leagueAggregateAddress);
     }
     
     function addResult(uint leagueId, uint homeParticipantId, 
