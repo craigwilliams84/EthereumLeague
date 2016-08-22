@@ -1,10 +1,10 @@
 contract LeagueAggregateI {
-    function isReferee(
-        uint leagueId, address potentialRefereeAddress) constant returns (bool) {}
+    function isRefereeAddress(
+        uint leagueId, address potentialRefereeAddress) constant returns (bool){}
     
-    function isParticipant(
-        uint leagueId, uint participantId, address) constant returns (bool) {}
+    function isParticipantAddress(
+        uint leagueId, uint participantId, address potentialParticipantAddress) constant returns (bool){}
 
     function addResult(uint leagueId, uint homeParticipantId, 
-        uint homeParticipantScore, uint awayParticipantId, uint awayParticipantScore) {}
+        uint homeParticipantScore, uint awayParticipantId, uint awayParticipantScore){}
 }

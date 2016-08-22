@@ -17,7 +17,7 @@ contract('LeagueAggregate', function(accounts) {
     leagueAgg.addLeague(fromAscii("Test League"), 3, 1, 1000000, {from: accounts[0], gas: 3000000}).then(function() {
     	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
     		return leagueAgg.addRefereeToLeague(leagueIds[0], accounts[1], {from: accounts[0], gas: 3000000}).then(function() {
-    			return leagueAgg.isReferee.call(leagueIds[0], accounts[1]).then(function(isReferee) {
+    			return leagueAgg.isRefereeAddress.call(leagueIds[0], accounts[1]).then(function(isReferee) {
     				assert.equal(isReferee, true, "Referee not added to the league correctly");
     				done();
     			});
@@ -50,6 +50,44 @@ contract('LeagueAggregate', function(accounts) {
     			return leagueAgg.doesLeagueContainParticipant.call(leagueIds[0], fromAscii(participantName)).then(function(doesExist) {
     				assert.equal(doesExist, true, "Participant has not been added to the league");
     				done();
+    			});
+    		});
+    	});
+    }).catch(function(err) {
+    	done(err);
+  	});
+  }));
+  
+  it("should be able to establish when a participant address is valid", redeploy(accounts[0], function(done, leagueAgg){    
+    var participantName =  "Tottenham Hotspur";
+    	
+    leagueAgg.addLeague(fromAscii("Test League", 32), 3, 1, 1000000, {from: accounts[0], gas: 3000000}).then(function() {
+    	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
+    		return leagueAgg.joinLeague(leagueIds[0], fromAscii(participantName), {from: accounts[1], gas: 3000000, value: 1000000}).then(function() {
+    			return leagueAgg.getLeagueDetails.call(leagueIds[0]).then(function(leagueDetails) {
+    				return leagueAgg.isParticipantAddress.call(leagueIds[0], leagueDetails[1][0], accounts[1]).then(function(isParticipantAddress) {
+    					assert.equal(isParticipantAddress, true, "Invalid return value from isParticipantAddress");
+    					done();
+    				});
+    			});
+    		});
+    	});
+    }).catch(function(err) {
+    	done(err);
+  	});
+  }));
+  
+  it("should be able to establish when a participant address is invalid", redeploy(accounts[0], function(done, leagueAgg){    
+    var participantName =  "Tottenham Hotspur";
+    	
+    leagueAgg.addLeague(fromAscii("Test League", 32), 3, 1, 1000000, {from: accounts[0], gas: 3000000}).then(function() {
+    	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
+    		return leagueAgg.joinLeague(leagueIds[0], fromAscii(participantName), {from: accounts[1], gas: 3000000, value: 1000000}).then(function() {
+    			return leagueAgg.getLeagueDetails.call(leagueIds[0]).then(function(leagueDetails) {
+    				return leagueAgg.isParticipantAddress.call(leagueIds[0], leagueDetails[1][0], accounts[2]).then(function(isParticipantAddress) {
+    					assert.equal(isParticipantAddress, false, "Invalid return value from isParticipantAddress");
+    					done();
+    				});
     			});
     		});
     	});

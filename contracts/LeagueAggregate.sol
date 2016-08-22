@@ -78,7 +78,7 @@ contract LeagueAggregate is LeagueAggregateI {
         	}
         }
     }
-    
+        
     function doesLeagueContainParticipant(uint leagueId, bytes32 participantName) constant returns (bool){
         League league = leagues[leagueId];
         
@@ -91,7 +91,24 @@ contract LeagueAggregate is LeagueAggregateI {
         return false;
     }
     
-    function isReferee(uint leagueId, address potentialRefereeAddress) constant returns (bool) {
+    function isParticipantAddress(uint leagueId, uint participantId, address potentialParticipantAddress) constant returns (bool) {
+    	League league = leagues[leagueId];
+        
+        for (uint i = 0; i < league.participants.length; i++) {
+            if (league.participants[i].id == participantId) {
+            
+            	if(league.participants[i].adminAddress == potentialParticipantAddress) {
+                	return true;
+                }
+                
+                return false;
+            }
+        }
+        
+        return false;
+    }
+    
+    function isRefereeAddress(uint leagueId, address potentialRefereeAddress) constant returns (bool) {
         League league = leagues[leagueId];
         
         for (uint i = 0; i < league.referees.length; i++) {

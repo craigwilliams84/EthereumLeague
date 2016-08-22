@@ -3,7 +3,7 @@ import "LeagueAggregateI.sol";
 contract ResultAggregate {
     address owner;
     address[] administrators;
-    mapping (uint => Result) results;
+    mapping (uint => Result[]) results;
     LeagueAggregateI leagueAggregate;
     uint currentId = 0;
 
@@ -13,47 +13,81 @@ contract ResultAggregate {
     }
     
     function addResult(uint leagueId, uint homeParticipantId, 
-        uint homeParticipantScore, uint awayParticipantId, uint awayParticipantScore) onlyReferee(leagueId) {
+        uint16 homeScore, uint awayParticipantId, uint16 awayScore) onlyReferee(leagueId) {
         
-        uint id = getNewId();
-        Result result = results[id];
-        result.id = id;
-        result.leagueId = leagueId;
-        result.status = ResultStatus.PENDING;
-        result.homeParticipantId = homeParticipantId;
-        result.homeParticipantScore = homeParticipantScore;
-        result.awayParticipantId = awayParticipantId;
-        result.awayParticipantScore = awayParticipantScore;
-        result.referee = msg.sender;
+        uint id = getNewResultId(leagueId);
+        results[leagueId].length++;
+        results[leagueId][id].id = id;
+        results[leagueId][id].leagueId = leagueId;
+        results[leagueId][id].status = ResultStatus.PENDING;
+        results[leagueId][id].homeParticipantId = homeParticipantId;
+        results[leagueId][id].homeScore = homeScore;
+        results[leagueId][id].awayParticipantId = awayParticipantId;
+        results[leagueId][id].awayScore = awayScore;
+        results[leagueId][id].referee = msg.sender;
     }
     
-    function acceptResult(uint resultId) 
-        onlyParticipant(resultId) hasNotActed(resultId) atStatus(resultId, ResultStatus.PENDING) {
+    function getPendingResultIds(uint leagueId) constant returns (uint[]) {
+        return getResultIds(leagueId, ResultStatus.PENDING);
+    }
+    
+    function getResultIds(uint leagueId, ResultStatus status) constant private returns (uint[]) {
         
-        if (results[resultId].acted != address(0)) {
-            changeStatus(resultId, ResultStatus.ACCEPTED);
+        uint numResults = 0;
+        for (uint i = 0; i < results[leagueId].length; i++) {
+            if (results[leagueId][i].status == status) {
+                numResults++;
+            }
+        }
+        
+        uint[] memory resultIds = new uint[](numResults);
+        uint counter = 0;
+        
+        for (uint n = 0; n < results[leagueId].length; n++) {
+            if (results[leagueId][n].status == status) {
+                resultIds[counter] = results[leagueId][n].id;
+                counter++;
+            }
+        }
+        
+        return resultIds;
+    }
+    
+    function getResultDetails(uint leagueId, uint resultId) constant returns(
+        ResultStatus status, uint homePartId, uint16 homeScore, uint awayPartId, uint16 awayScore, address acted) {
+        
+        Result result = results[leagueId][resultId];
+        return (result.status, result.homeParticipantId, result.homeScore, result.awayParticipantId, result.awayScore, result.acted);
+    }
+    
+    function acceptResult(uint leagueId, uint resultId) 
+        onlyParticipant(leagueId, resultId) hasNotActed(leagueId, resultId) atStatus(leagueId, resultId, ResultStatus.PENDING) {
+        
+        if (results[leagueId][resultId].acted != 0 
+        	&& results[leagueId][resultId].acted != msg.sender) {
+            changeStatus(leagueId, resultId, ResultStatus.ACCEPTED);
         } else {
-            results[resultId].acted = msg.sender;
+            results[leagueId][resultId].acted = msg.sender;
         }
     }
     
-    function disputeResult(uint resultId) 
-        onlyParticipant(resultId) hasNotActed(resultId) atStatus(resultId, ResultStatus.PENDING){
+    function disputeResult(uint leagueId, uint resultId) 
+        onlyParticipant(leagueId, resultId) hasNotActed(leagueId, resultId) atStatus(leagueId, resultId, ResultStatus.PENDING){
         
     }
     
-    function changeStatus(uint resultId, ResultStatus status) private {
-        Result result = results[resultId];
+    function changeStatus(uint leagueId, uint resultId, ResultStatus status) private {
+        Result result = results[leagueId][resultId];
         result.status = status;
 
         if (status == ResultStatus.ACCEPTED) {
             leagueAggregate.addResult(result.leagueId, result.homeParticipantId, 
-                result.homeParticipantScore, result.awayParticipantId, result.awayParticipantScore);
+                result.homeScore, result.awayParticipantId, result.awayScore);
         }
     }
     
-    function getNewId() private returns (uint id) {
-        return currentId++;
+    function getNewResultId(uint leagueId) private returns (uint id) {
+        return results[leagueId].length;
     }
 
     modifier onlyOwner (string name) {
@@ -65,33 +99,32 @@ contract ResultAggregate {
     
     modifier onlyReferee (uint leagueId) {
         
-        if (!leagueAggregate.isReferee(leagueId, msg.sender)) {
+        if (!leagueAggregate.isRefereeAddress(leagueId, msg.sender)) {
             throw;
         }
         _
     }
     
-    modifier onlyParticipant (uint resultId) {
-        Result result = results[resultId];
+    modifier onlyParticipant (uint leagueId, uint resultId) {
+        Result result = results[leagueId][resultId];    
         
-        
-        if (!leagueAggregate.isParticipant(result.leagueId, result.homeParticipantId, msg.sender)
-                && !leagueAggregate.isParticipant(result.leagueId, result.awayParticipantId, msg.sender)) {
+        if (!leagueAggregate.isParticipantAddress(leagueId, result.homeParticipantId, msg.sender)
+                && !leagueAggregate.isParticipantAddress(leagueId, result.awayParticipantId, msg.sender)) {
             throw;
         }
         _
     }
     
-    modifier hasNotActed (uint resultId) {
+    modifier hasNotActed (uint leagueId, uint resultId) {
         
-        if (results[resultId].acted == msg.sender) {
+        if (results[leagueId][resultId].acted == msg.sender) {
             throw;
         }
         _
     }
     
-    modifier atStatus(uint resultId, ResultStatus status) {
-        if (results[resultId].status != status) {
+    modifier atStatus(uint leagueId, uint resultId, ResultStatus status) {
+        if (results[leagueId][resultId].status != status) {
             throw;
         }
         _
@@ -103,15 +136,16 @@ contract ResultAggregate {
         }
     }
     
-    enum ResultStatus { PENDING, DISPUTED, ACCEPTED, MODIFIED, RESOLVED } 
+    enum ResultStatus { PENDING, DISPUTED, ACCEPTED } 
+    
     struct Result {
         uint id;
         uint leagueId;
         ResultStatus status;
         uint homeParticipantId;
-        uint homeParticipantScore;
+        uint16 homeScore;
         uint awayParticipantId;
-        uint awayParticipantScore;
+        uint16 awayScore;
         address referee;
         address acted;
     }
