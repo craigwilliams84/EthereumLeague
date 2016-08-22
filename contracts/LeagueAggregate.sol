@@ -7,12 +7,12 @@ contract LeagueAggregate is LeagueAggregateI {
         uint id;
         bytes32 name;
         uint entryFee;
-        uint pointsForWin;
-        uint pointsForDraw;
+        uint8 pointsForWin;
+        uint8 pointsForDraw;
         address adminAddress;
         address[] referees;
         Participant[] participants;
-        mapping (uint => uint) scores;
+        mapping (uint => uint16) scores;
     }
     
     struct Participant {
@@ -29,14 +29,15 @@ contract LeagueAggregate is LeagueAggregateI {
     League[] leagues;
     mapping (address => uint) availableFunds;
     
-    uint currentId = 0;
+    uint currentLeagueId = 0;
+    uint currentParticipantId = 0;
 
     function LeagueAggregate() {
         owner = msg.sender;
     }
 
-    function addLeague(bytes32 name, uint pointsForWin, uint pointsForDraw, uint entryFee) {
-        uint id = getNewId();
+    function addLeague(bytes32 name, uint8 pointsForWin, uint8 pointsForDraw, uint entryFee) {
+        uint id = getNewLeagueId();
         leagues.length = leagues.length + 1;
         leagues[id].id = id;
         leagues[id].name = name;
@@ -69,7 +70,7 @@ contract LeagueAggregate is LeagueAggregateI {
         		}
             	uint index = leagues[leagueId].participants.length;
         		leagues[leagueId].participants.length = index + 1;
-        		uint id = getNewId();
+        		uint id = getNewParticipantId();
         		leagues[leagueId].participants[index].id = id;
         		leagues[leagueId].participants[index].name = participantName;
         		leagues[leagueId].participants[index].adminAddress = msg.sender;
@@ -103,7 +104,7 @@ contract LeagueAggregate is LeagueAggregateI {
     }
     
     function addResult(uint leagueId, uint homeParticipantId, 
-        uint homeParticipantScore, uint awayParticipantId, uint awayParticipantScore) onlyResultAggregateContract {
+        uint16 homeParticipantScore, uint awayParticipantId, uint16 awayParticipantScore) onlyResultAggregateContract {
 
         if (homeParticipantScore > awayParticipantScore) {
             //Home win
@@ -145,12 +146,12 @@ contract LeagueAggregate is LeagueAggregateI {
         return leagueIds;
     }
     
-    function getLeagueDetails(uint leagueId) constant returns (bytes32 name, uint[] participantIds, bytes32[] participantNames, uint[] participantScores) {
+    function getLeagueDetails(uint leagueId) constant returns (bytes32 name, uint[] participantIds, bytes32[] participantNames, uint16[] participantScores) {
     
         League league = leagues[leagueId];
         uint[] memory partIds = new uint[](league.participants.length);
         bytes32[] memory partNames = new bytes32[](league.participants.length);
-        uint[] memory partScores = new uint[](league.participants.length);
+        uint16[] memory partScores = new uint16[](league.participants.length);
         
         for (uint i = 0; i < league.participants.length; i++) {
             Participant participant = league.participants[i];
@@ -162,8 +163,12 @@ contract LeagueAggregate is LeagueAggregateI {
         return(league.name, partIds, partNames, partScores);
     }
     
-    function getNewId() private returns (uint id) {
-        return currentId++;
+    function getNewLeagueId() private returns (uint id) {
+        return currentLeagueId++;
+    }
+    
+    function getNewParticipantId() private returns (uint id) {
+        return currentParticipantId++;
     }
     
     function setResultAggregateAddress(address resultAggAdd) onlyOwner {
