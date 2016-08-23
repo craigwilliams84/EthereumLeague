@@ -1,4 +1,4 @@
 # EthereumLeague
-A collection of ethereum smart contracts for managing a league
+A collection of smart contracts for managing a league on an Ethereum blockchain.
 
 # Work in Progress
