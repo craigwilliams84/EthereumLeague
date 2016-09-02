@@ -231,6 +231,8 @@ contract('LeagueAggregate', function(accounts) {
     								var partScores = leagueDetailsUpdated[3];
     								assert.equal(partScores[0], 3, "Home team score not updated correctly");
     								assert.equal(partScores[1], 0, "Away team score is not 0");
+    								
+    								assert.equal(leagueDetailsUpdated[4], 1000000, "Entry fee not returned correctly");
     								done();
     							});
     						});

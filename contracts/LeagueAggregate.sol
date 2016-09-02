@@ -163,7 +163,7 @@ contract LeagueAggregate is LeagueAggregateI {
         return leagueIds;
     }
     
-    function getLeagueDetails(uint leagueId) constant returns (bytes32 name, uint[] participantIds, bytes32[] participantNames, uint16[] participantScores) {
+    function getLeagueDetails(uint leagueId) constant returns (bytes32 name, uint[] participantIds, bytes32[] participantNames, uint16[] participantScores, uint entryFee) {
     
         League league = leagues[leagueId];
         uint[] memory partIds = new uint[](league.participants.length);
@@ -177,7 +177,7 @@ contract LeagueAggregate is LeagueAggregateI {
             partScores[i] = league.scores[participant.id];
         }
 
-        return(league.name, partIds, partNames, partScores);
+        return(league.name, partIds, partNames, partScores, league.entryFee);
     }
     
     function getNewLeagueId() private returns (uint id) {
