@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="." />
+  <title>EtherLeague - A Blockchain League Manager</title>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+  <!--script src="./angular.js"></script>
+  <script src="./lightwallet.js"></script>
+  <script src="./hooked-web3-provider.js"></script>
+  <script src="./etherLeagueController.js"></script-->
+  <script src="./app.js"></script>
+  <script src="./angular.js"></script>
+  <script src="./AccountsService.js"></script>
+  <script src="./LeagueAggregateService.js"></script>
+  <script src="./etherLeague.js"></script>
+  <script src="./LeagueController.js"></script>
+</head>
+<body ng-app="etherLeagueApp" ng-controller="etherLeagueController">
+  <h3>Account: <span class="black"><span id="account">{{ account }}</span></span></h3>
+  <h3>Balance: <span class="black"><span id="balance">{{ balance }}</span></span></h3>
+  
+  <strong>Admin Leagues</strong>
+  <table>
+    <tr ng-repeat="league in adminLeagues">
+      <td><a href="#/league/{{ league.id.toString() }}">{{ league.name }}</a></td>
+    </tr>
+  </table>
+
+  <br>
+  <h1>Add League</h1>
+  <br><label for="name">Name:</label><input type="text" id="name" ng-model="name" placeholder="e.g., Premier League"></input>
+  <br><label for="entryFee">Entry Fee (Wei):</label><input type="text" id="entryFee" ng-model="entryFee" placeholder="e.g., 10000000"></input>
+  <br><label for="pointsForWin">Points For Win:</label><input type="text" id="pointsForWin" ng-model="pointsForWin" placeholder="e.g., 3"></input>
+  <br><label for="pointsForDraw">Points For Draw:</label><input type="text" id="pointsForDraw" ng-model="pointsForDraw" placeholder="e.g., 1"></input>
+  <br><br><button id="add" ng-click="addLeague(name, pointsForWin, pointsForDraw, entryFee)">Add</button>
+  <br><br>
+  
+  <br>
+  <h1>Join League</h1>
+  <br><label for="leagueId">League Id:</label><input type="text" id="leagueId" ng-model="leagueId" placeholder="e.g., 1"></input>
+  <br><label for="teamName">Team Name:</label><input type="text" id="teamName" ng-model="teamName" placeholder="e.g., Tottenham"></input>
+  <br><br><button id="add" ng-click="joinLeague(leagueId, teamName)">Join</button>
+  <br><br>
+  
+  <button id="refresh" ng-click="refreshAll()">Refresh</button>
+  <div ng-view ></div>
+  <span id="status"></span>
+</body>
+</html>
