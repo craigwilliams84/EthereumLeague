@@ -1,3 +1,4 @@
+pragma solidity ^0.4.2;
 contract LeagueAggregateI {
     function isRefereeAddress(
         uint leagueId, address potentialRefereeAddress) constant returns (bool){}

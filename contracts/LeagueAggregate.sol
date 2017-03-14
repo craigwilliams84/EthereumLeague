@@ -1,4 +1,5 @@
-import "StringUtils.sol";
+pragma solidity ^0.4.2;
+
 import "LeagueAggregateI.sol";
 
 contract LeagueAggregate is LeagueAggregateI {
@@ -6,20 +7,24 @@ contract LeagueAggregate is LeagueAggregateI {
     struct League {
         uint id;
         bytes32 name;
+        LeagueStatus status;
         uint entryFee;
         uint8 pointsForWin;
         uint8 pointsForDraw;
+        uint8 numOfEntrants;
         address adminAddress;
         address[] referees;
         Participant[] participants;
         mapping (uint => uint16) scores;
     }
-    
+
     struct Participant {
         uint id;
         bytes32 name;
         address adminAddress;
     }
+
+enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
 
     address owner;
     address[] administrators;
@@ -28,7 +33,7 @@ contract LeagueAggregate is LeagueAggregateI {
     //and league indexes are incremental anyway
     League[] leagues;
     mapping (address => uint) availableFunds;
-    
+
     uint currentLeagueId = 0;
     uint currentParticipantId = 0;
 
@@ -36,7 +41,8 @@ contract LeagueAggregate is LeagueAggregateI {
         owner = msg.sender;
     }
 
-    function addLeague(bytes32 name, uint8 pointsForWin, uint8 pointsForDraw, uint entryFee) {
+    function addLeague(bytes32 name,
+      uint8 pointsForWin, uint8 pointsForDraw, uint entryFee, uint8 numOfEntrants) {
         uint id = getNewLeagueId();
         leagues.length = leagues.length + 1;
         leagues[id].id = id;
@@ -44,84 +50,88 @@ contract LeagueAggregate is LeagueAggregateI {
         leagues[id].pointsForWin = pointsForWin;
         leagues[id].pointsForDraw = pointsForDraw;
         leagues[id].entryFee = entryFee;
+        leagues[id].numOfEntrants = numOfEntrants;
         leagues[id].adminAddress = msg.sender;
-        
+
         OnLeagueAdded(id);
     }
-    
-    function addRefereeToLeague(uint leagueId, address refereeAddress) onlyAdmin(leagueId) {
-    	leagues[leagueId].referees.push(refereeAddress);
-    }
-    
-    function joinLeague(uint leagueId, bytes32 participantName) {
 
+    function addRefereeToLeague(uint leagueId, address refereeAddress) onlyAdmin(leagueId) {
+        leagues[leagueId].referees.push(refereeAddress);
+    }
+
+    function joinLeague(uint leagueId, bytes32 participantName) payable onlyAwaitingParticipants(leagueId) {
         //Check team doesn't exist
         if (doesLeagueContainParticipant(leagueId, participantName)) {
             throw;
         } else {
-        	//Check the entry fee is correct
-        	if (msg.value < leagues[leagueId].entryFee) {
-        		//Too low, add funds to be withdrawn
-        		availableFunds[msg.sender] =+ msg.value;
-        	} else {
-        		if (msg.value > leagues[leagueId].entryFee) {
-        			//Too high, add remainder to available funds to withdraw
-        			availableFunds[msg.sender] =+ msg.value - leagues[leagueId].entryFee;
-        		}
-            	uint index = leagues[leagueId].participants.length;
-        		leagues[leagueId].participants.length = index + 1;
-        		uint id = getNewParticipantId();
-        		leagues[leagueId].participants[index].id = id;
-        		leagues[leagueId].participants[index].name = participantName;
-        		leagues[leagueId].participants[index].adminAddress = msg.sender;
-        		leagues[leagueId].scores[id] = 0;
-        	}
+            //Check the entry fee is correct
+            if (msg.value < leagues[leagueId].entryFee) {
+                //Too low, add funds to be withdrawn
+                availableFunds[msg.sender] =+ msg.value;
+            } else {
+
+                if (msg.value > leagues[leagueId].entryFee) {
+                    //Too high, add remainder to available funds to withdraw
+                    availableFunds[msg.sender] =+ msg.value - leagues[leagueId].entryFee;
+                }
+
+                uint index = leagues[leagueId].participants.length;
+                leagues[leagueId].participants.length = index + 1;
+                uint id = getNewParticipantId();
+                leagues[leagueId].participants[index].id = id;
+                leagues[leagueId].participants[index].name = participantName;
+                leagues[leagueId].participants[index].adminAddress = msg.sender;
+                leagues[leagueId].scores[id] = 0;
+
+                OnLeagueJoined(leagueId, id, msg.sender);
+            }
         }
     }
-        
+
     function doesLeagueContainParticipant(uint leagueId, bytes32 participantName) constant returns (bool){
         League league = leagues[leagueId];
-        
+
         for (uint i = 0; i < league.participants.length; i++) {
             if (league.participants[i].name == participantName) {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     function isParticipantAddress(uint leagueId, uint participantId, address potentialParticipantAddress) constant returns (bool) {
-    	League league = leagues[leagueId];
-        
+        League league = leagues[leagueId];
+
         for (uint i = 0; i < league.participants.length; i++) {
             if (league.participants[i].id == participantId) {
-            
-            	if(league.participants[i].adminAddress == potentialParticipantAddress) {
-                	return true;
+
+                if(league.participants[i].adminAddress == potentialParticipantAddress) {
+                    return true;
                 }
-                
+
                 return false;
             }
         }
-        
+
         return false;
     }
-    
+
     function isRefereeAddress(uint leagueId, address potentialRefereeAddress) constant returns (bool) {
         League league = leagues[leagueId];
-        
+
         for (uint i = 0; i < league.referees.length; i++) {
             if (league.referees[leagueId] == potentialRefereeAddress) {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
-    function addResult(uint leagueId, uint homeParticipantId, 
-        uint16 homeParticipantScore, uint awayParticipantId, uint16 awayParticipantScore) onlyResultAggregateContract {
+
+    function addResult(uint leagueId, uint homeParticipantId,
+      uint16 homeParticipantScore, uint awayParticipantId, uint16 awayParticipantScore) onlyResultAggregateContract {
 
         if (homeParticipantScore > awayParticipantScore) {
             //Home win
@@ -135,23 +145,23 @@ contract LeagueAggregate is LeagueAggregateI {
             leagues[leagueId].scores[awayParticipantId] += leagues[leagueId].pointsForDraw;
         }
     }
-    
+
     function getLeaguesForAdmin(address adminAddress) constant returns (uint[]) {
 
         //Push not available for memory arrays so we need to keep a count
         uint foundLeagueCount;
-        
+
         for(uint i = 0; i < leagues.length; i++) {
             if (leagues[i].adminAddress == adminAddress) {
                 foundLeagueCount++;
             }
         }
-        
+
         //Memory arrays can't be dynamic...Is there a better way to do this rather than iterating twice??
         uint[] memory leagueIds = new uint[](foundLeagueCount);
-        
+
         foundLeagueCount = 0;
-        
+
         //Can't use i again here
         for(uint x = 0; x < leagues.length; x++) {
             if (leagues[x].adminAddress == adminAddress) {
@@ -159,17 +169,17 @@ contract LeagueAggregate is LeagueAggregateI {
                 foundLeagueCount++;
             }
         }
-        
+
         return leagueIds;
     }
-    
-    function getLeagueDetails(uint leagueId) constant returns (bytes32 name, uint[] participantIds, bytes32[] participantNames, uint16[] participantScores, uint entryFee) {
-    
+
+    function getLeagueDetails(uint leagueId) constant returns (bytes32 name, uint[] participantIds, bytes32[] participantNames, uint16[] participantScores, uint entryFee, LeagueStatus status, uint8 numOfEntrants) {
+
         League league = leagues[leagueId];
         uint[] memory partIds = new uint[](league.participants.length);
         bytes32[] memory partNames = new bytes32[](league.participants.length);
         uint16[] memory partScores = new uint16[](league.participants.length);
-        
+
         for (uint i = 0; i < league.participants.length; i++) {
             Participant participant = league.participants[i];
             partIds[i] = participant.id;
@@ -177,43 +187,52 @@ contract LeagueAggregate is LeagueAggregateI {
             partScores[i] = league.scores[participant.id];
         }
 
-        return(league.name, partIds, partNames, partScores, league.entryFee);
+        return(league.name, partIds, partNames, partScores, league.entryFee, league.status, league.numOfEntrants);
     }
-    
+
     function getNewLeagueId() private returns (uint id) {
         return currentLeagueId++;
     }
-    
+
     function getNewParticipantId() private returns (uint id) {
         return currentParticipantId++;
     }
-    
+
     function setResultAggregateAddress(address resultAggAdd) onlyOwner {
-    	resultAggregateAddress = resultAggAdd;
+        resultAggregateAddress = resultAggAdd;
     }
 
     modifier onlyOwner () {
         if (msg.sender != owner) {
             throw;
         }
-        _
+        _;
     }
-    
+
     modifier onlyAdmin (uint leagueId) {
         if (leagues[leagueId].adminAddress != msg.sender) {
             throw;
         }
-        _
+        _;
     }
-    
+
     modifier onlyResultAggregateContract () {
         if (resultAggregateAddress != msg.sender) {
             throw;
         }
-        _
+        _;
     }
-    
+
+    modifier onlyAwaitingParticipants (uint leagueId) {
+        if (leagues[leagueId].status != LeagueStatus.AWAITING_PARTICIPANTS) {
+            throw;
+        }
+        _;
+    }
+
     event OnLeagueAdded(uint indexed id);
+
+    event OnLeagueJoined(uint indexed leagueId, uint indexed participantId, address indexed participantAddress);
 
     function killMe() {
         if (msg.sender == owner) {

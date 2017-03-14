@@ -1,0 +1,20 @@
+<div class="row">
+    <h1>Find League</h1>
+    <br><label for="leagueId">League Id:</label><input type="text" id="leagueId" ng-model="leagueId" placeholder="1234"></input>
+    <br><br><button id="find" class="btn btn-primary" ng-click="findLeague(leagueId)">Find</button>
+    <br><br>
+</div>
+
+<ng-include src="'league.html'"></ng-include>
+
+<div class="row" ng-hide="leagues.length  == 0">
+    <div class="col-sm-4">
+        <div class="input-group">
+            <input type="text" class="form-control" ng-model="teamName" placeholder="Team Name">
+          <span class="input-group-btn">
+            <button id="join" class="btn btn-primary" type="button" ng-click="joinLeague(teamName)">Join</button>
+          </span>
+        </div>
+    </div>
+</div>
+

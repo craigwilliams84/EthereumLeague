@@ -1,3 +1,5 @@
+pragma solidity ^0.4.2;
+
 import "LeagueAggregateI.sol";
 
 contract ResultAggregate {
@@ -94,7 +96,7 @@ contract ResultAggregate {
         if (msg.sender != owner) {
             throw;
         }
-        _
+        _;
     }
     
     modifier onlyReferee (uint leagueId) {
@@ -102,7 +104,7 @@ contract ResultAggregate {
         if (!leagueAggregate.isRefereeAddress(leagueId, msg.sender)) {
             throw;
         }
-        _
+        _;
     }
     
     modifier onlyParticipant (uint leagueId, uint resultId) {
@@ -112,7 +114,7 @@ contract ResultAggregate {
                 && !leagueAggregate.isParticipantAddress(leagueId, result.awayParticipantId, msg.sender)) {
             throw;
         }
-        _
+        _;
     }
     
     modifier hasNotActed (uint leagueId, uint resultId) {
@@ -120,14 +122,14 @@ contract ResultAggregate {
         if (results[leagueId][resultId].acted == msg.sender) {
             throw;
         }
-        _
+        _;
     }
     
     modifier atStatus(uint leagueId, uint resultId, ResultStatus status) {
         if (results[leagueId][resultId].status != status) {
             throw;
         }
-        _
+        _;
     }
 
     function killMe() {

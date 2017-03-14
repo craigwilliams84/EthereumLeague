@@ -1,3 +1,30 @@
-<div>
-League!
-<div>
+<div class="panel-group" id="accordion">
+    <div class="panel panel-default" ng-repeat="league in leagues">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" data-target="#collapse1">{{ league.name }}</a>
+            </h4>
+        </div>
+        <div id="#collapse1" class="panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <h5>Status</h5> {{ league.status.toString() }}
+                    </div>
+                    <div class="col-sm-6">
+                        <h5>Entry Fee</h5> {{ league.entryFee.toString() }}
+                    </div>
+                </div>
+                <div class="row">
+                    <table class="table">
+                        <tr ng-repeat="entry in league.entries">
+                            <td>{{ entry.name }}</td>
+                            <td>{{ entry.score }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
