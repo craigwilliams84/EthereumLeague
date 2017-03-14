@@ -15,15 +15,13 @@
                         <h5>Entry Fee</h5> {{ league.entryFee.toString() }}
                     </div>
                 </div>
-                <div class="row">
-                    <table class="table">
-                        <tr ng-repeat="entry in league.entries">
-                            <td>{{ entry.name }}</td>
-                            <td>{{ entry.score }}</td>
-                        </tr>
-                    </table>
-                </div>
             </div>
+            <table class="table">
+                <tr ng-repeat="entry in league.entries">
+                    <td>{{ entry.name }}</td>
+                    <td>{{ entry.score }}</td>
+                </tr>
+            </table>
         </div>
     </div>
 </div>

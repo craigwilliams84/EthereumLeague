@@ -85,6 +85,10 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
                 leagues[leagueId].scores[id] = 0;
 
                 OnLeagueJoined(leagueId, id, msg.sender);
+
+                if (leagues[leagueId].participants.length == leagues[leagueId].numOfEntrants) {
+                    updateLeagueStatus(leagueId, LeagueStatus.IN_PROGRESS);
+                }
             }
         }
     }
@@ -188,6 +192,10 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
         }
 
         return(league.name, partIds, partNames, partScores, league.entryFee, league.status, league.numOfEntrants);
+    }
+
+    function updateLeagueStatus(uint leagueId, LeagueStatus leagueStatus) private {
+        leagues[leagueId].status = leagueStatus;
     }
 
     function getNewLeagueId() private returns (uint id) {

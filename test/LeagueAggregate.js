@@ -57,6 +57,21 @@ contract('LeagueAggregate', function(accounts) {
     	done(err);
   	});
   }));
+
+	it("should progress status to IN_PROGRESS (1) when league is full", redeploy(accounts[0], function(done, leagueAgg){
+		leagueAgg.addLeague(fromAscii("Test League", 32), 3, 1, 1000000, 2, {from: accounts[0], gas: 3000000}).then(function() {
+			return leagueAgg.getLeaguesForAdmin.call(accounts[0]);
+		}).then(function(leagueIds) {
+			return leagueAgg.joinLeague(leagueIds[0], fromAscii("Participant1"), {from: accounts[1], gas: 3000000, value: 1000000}).then(function(){
+				return leagueAgg.joinLeague(leagueIds[0], fromAscii("Participant2"), {from: accounts[1], gas: 3000000, value: 1000000})
+			}).then(function() {
+				return leagueAgg.getLeagueDetails.call(leagueIds[0]);
+			}).then(function(leagueDetails) {
+				assert.equal(leagueDetails[5], 1, "League status not set to IN_PROGRESS correctly");
+				done();
+			});;
+		});
+	}));
   
   it("should be able to establish when a participant address is valid", redeploy(accounts[0], function(done, leagueAgg){    
     var participantName =  "Tottenham Hotspur";
