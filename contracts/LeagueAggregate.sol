@@ -60,7 +60,7 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
         leagues[leagueId].referees.push(refereeAddress);
     }
 
-    function joinLeague(uint leagueId, bytes32 participantName) payable onlyAwaitingParticipants(leagueId) {
+    function joinLeague(uint leagueId, bytes32 participantName) payable onlyWithStatus(leagueId, LeagueStatus.AWAITING_PARTICIPANTS) {
         //Check team doesn't exist
         if (doesLeagueContainParticipant(leagueId, participantName)) {
             throw;
@@ -231,8 +231,8 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
         _;
     }
 
-    modifier onlyAwaitingParticipants (uint leagueId) {
-        if (leagues[leagueId].status != LeagueStatus.AWAITING_PARTICIPANTS) {
+    modifier onlyWithStatus (uint leagueId, LeagueStatus status) {
+        if (leagues[leagueId].status != status) {
             throw;
         }
         _;
