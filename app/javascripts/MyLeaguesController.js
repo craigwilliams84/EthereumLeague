@@ -7,7 +7,13 @@ angular.module('etherLeagueApp').controller('myLeaguesCtrl', ['$scope', '$routeP
   };
 
   var init = function() {
-    leagueListCtrlCommon.loadLeagues(leagueAggregateService.getParticipantLeagueIds, $scope.leagues);
+    //leagueListCtrlCommon.loadLeagues(leagueAggregateService.getParticipantLeagueIds, $scope.leagues);
+    leagueAggregateService.getMyLeagues()
+      .then(function(leagues) {
+        $timeout(function() {
+          $scope.leagues = leagues;
+        })
+      });
   };
 
   init();

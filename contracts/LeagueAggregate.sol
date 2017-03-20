@@ -58,6 +58,7 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
 
     function addRefereeToLeague(uint leagueId, address refereeAddress) onlyAdmin(leagueId) {
         leagues[leagueId].referees.push(refereeAddress);
+        OnRefereeAdded(leagueId, refereeAddress);
     }
 
     function joinLeague(uint leagueId, bytes32 participantName) payable onlyWithStatus(leagueId, LeagueStatus.AWAITING_PARTICIPANTS) {
@@ -241,6 +242,8 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
     event OnLeagueAdded(uint indexed id);
 
     event OnLeagueJoined(uint indexed leagueId, uint indexed participantId, address indexed participantAddress);
+
+    event OnRefereeAdded(uint indexed leagueId, address indexed refereeAddress);
 
     function killMe() {
         if (msg.sender == owner) {

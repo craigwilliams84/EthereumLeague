@@ -2,6 +2,8 @@ angular.module('EtherLeagueServices', []).service('accountsService', ['$window',
 
   var accounts = [];
   var account = "";
+  var initialised = false;
+  var initPromiseResolves = [];
 
   this.getBalance = function(callback) {
 
@@ -46,8 +48,24 @@ angular.module('EtherLeagueServices', []).service('accountsService', ['$window',
       accounts = ks.getAddresses();
       account = "0x" + accounts[0];
       console.log("Your account is " + accounts[0]);
+      initialised = true;
       onInitialised();
+      initPromiseResolves.forEach(function(resolve) {
+        resolve();
+      });
     });
+  };
+
+  this.whenInitialised = function() {
+    var promise = new Promise(function(resolve, reject) {
+      if (initialised) {
+        resolve();
+      } else {
+        initPromiseResolves.push(resolve);
+      }
+    });
+
+    return promise;
   };
 
 }]);

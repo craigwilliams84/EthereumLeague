@@ -5,7 +5,9 @@ module.exports = {
     "myLeagues.html": "myLeagues.html",
     "admin.html": "admin.html",
     "join.html": "join.html",
+    "leagueDetails.html": "leagueDetails.html",
     "css/bootstrap.css": "css/bootstrap.css",
+    "css/etherLeague.css": "css/etherLeague.css",
     "app.js": [
       "javascripts/app.js"
     ],
@@ -19,13 +21,18 @@ module.exports = {
     "bootstrap.js" :[
     	"javascripts/_vendor/bootstrap.js",
     ],
-    "AccountsService.js": "javascripts/AccountsService.js",
-    "LeagueAggregateService.js": "javascripts/LeagueAggregateService.js",
-    "LeagueListControllerCommon.js": "javascripts/LeagueListControllerCommon.js",
-    "MyLeaguesController.js": "javascripts/MyLeaguesController.js",
-    "AdminController.js": "javascripts/AdminController.js",
-    "JoinLeagueController.js": "javascripts/JoinLeagueController.js",
-    "LeagueData.js": "javascripts/LeagueData.js",
+    "etherLeagueControllers.js" :[
+      "javascripts/LeagueListControllerCommon.js",
+      "javascripts/MyLeaguesController.js",
+      "javascripts/AdminController.js",
+      "javascripts/JoinLeagueController.js",
+      "javascripts/LeagueDetailsController.js"
+    ],
+    "etherLeagueServices.js" :[
+      "javascripts/AccountsService.js",
+      "javascripts/LeagueAggregateService.js",
+    ],
+    "LeagueData.js": "javascripts/LeagueCacheService.js",
     "etherLeague.js": [
       "javascripts/_vendor/lightwallet.js",
       "javascripts/_vendor/hooked-web3-provider.js",  

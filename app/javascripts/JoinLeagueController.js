@@ -8,9 +8,14 @@ angular.module('etherLeagueApp').controller('joinLeagueCtrl', ['$scope', '$route
 
   $scope.findLeague = function(leagueId) {
     $scope.leagues = [];
-    leagueListCtrlCommon.loadLeagues(function(callback) {
-      callback(null, [leagueId]);
-    }, $scope.leagues);
+    leagueAggregateService.getLeagueDetails(leagueId)
+      .then(function(league) {
+        $timeout(function() {
+          $scope.leagues[0] = league;
+        });
+      }).catch(function(e) {
+        console.error(e);
+    });
   };
 
   $scope.joinLeague = function(teamName) {

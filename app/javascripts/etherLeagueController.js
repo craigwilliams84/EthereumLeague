@@ -6,16 +6,19 @@ app.config(['$routeProvider', '$locationProvider', function($routeProvider, $loc
       templateUrl: 'myLeagues.html',
       controller: 'myLeaguesCtrl'
     }).when('/admin/', {
-    templateUrl: 'admin.html',
-    controller: 'adminCtrl'
-  }).when('/join/', {
-    templateUrl: 'join.html',
-    controller: 'joinLeagueCtrl'
-  }).otherwise({redirectTo: '/myLeagues/'});
+      templateUrl: 'admin.html',
+      controller: 'adminCtrl'
+    }).when('/join/', {
+      templateUrl: 'join.html',
+      controller: 'joinLeagueCtrl'
+    }).when('/leagueDetails/:leagueId', {
+      templateUrl: 'leagueDetails.html',
+      controller: 'leagueDetailsCtrl'
+    }).otherwise({redirectTo: '/myLeagues/'});
   $locationProvider.html5Mode(false);
 }]);
 
-app.controller("etherLeagueController", ['$scope', '$window', '$timeout', 'leagueAggregateService', 'accountsService', 'leagueData', function($scope, $window, $timeout, leagueAggregateService, accountsService, leagueData) {
+app.controller("etherLeagueController", ['$scope', '$window', '$timeout', 'leagueAggregateService', 'accountsService', function($scope, $window, $timeout, leagueAggregateService, accountsService) {
 
   $scope.balance = "";
   $scope.infoMessage = "";
@@ -25,25 +28,10 @@ app.controller("etherLeagueController", ['$scope', '$window', '$timeout', 'leagu
   $scope.adminLeagues = [];
   $scope.participantLeagues = [];
 
-  $scope.joinLeague = function(leagueId, teamName) {
-    setStatus("Initiating transaction... (please wait)");
-
-    leagueAggregateService.getLeagueDetails(leagueId, function(err, leagueDetails) {
-      leagueAggregateService.joinLeague(leagueDetails, teamName, function(err) {
-        if (err) {
-          console.log(err);
-          setStatus("Error sending coin; see log.");
-        } else {
-          setStatus("Transaction complete!");
-          $scope.refreshAll();
-        }
-      });
-    });
-  };
-
   $scope.refreshAll = function() {
-    $scope.refreshBalance();
-    $scope.refreshLeagues();
+    $timeout(function() {
+      $scope.refreshBalance();
+    });
   };
 
   $scope.refreshBalance = function() {
@@ -53,30 +41,6 @@ app.controller("etherLeagueController", ['$scope', '$window', '$timeout', 'leagu
       } else {
         $timeout(function() {
           $scope.balance = result;
-        });
-      }
-    });
-  };
-
-  $scope.refreshLeagues = function() {
-    leagueAggregateService.getAdminLeagueIds(function(err, leagueIds) {
-      if (err) {
-        console.error(err);
-      } else {
-        $scope.adminLeagues = [];
-        leagueIds.forEach(function(id) {
-          getAndAddLeagueDetails(id, $scope.adminLeagues);
-        });
-      }
-    });
-
-    leagueAggregateService.getParticipantLeagueIds(function(err, leagueIds) {
-      if (err) {
-        console.error(err);
-      } else {
-        $scope.participantLeagues = [];
-        leagueIds.forEach(function(id) {
-          getAndAddLeagueDetails(id, $scope.participantLeagues);
         });
       }
     });
@@ -100,20 +64,7 @@ app.controller("etherLeagueController", ['$scope', '$window', '$timeout', 'leagu
       $scope.successMessage = success;
       $scope.errorMessage = error;
     });
-  }
-
-  var getAndAddLeagueDetails = function(id, leagues) {
-    leagueAggregateService.getLeagueDetails(id, function(err, leagueDetails) {
-      $timeout(function() {
-        leagues.push(leagueDetails);
-        leagueData.put(id, leagueDetails);
-      });
-    });
   };
-
-  function setStatus(status) {
-    $scope.status = status;
-  }
 
   accountsService.init(function() {
     $scope.refreshAll();

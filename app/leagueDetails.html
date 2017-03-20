@@ -1,0 +1,60 @@
+<div class="page-header">
+    <h2>{{ getLeague().name }}</h2>
+</div>
+<div class="row">
+    <div class="col-sm-3"><p>&#160;</p></div>
+    <div class="col-sm-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    Current Standings
+                </h4>
+            </div>
+            <div class="panel-body">
+                <table class="table">
+                    <tr ng-repeat="entry in getLeague().entries">
+                        <td>{{ entry.name }}</td>
+                        <td>{{ entry.score.toString() }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3"><p>&#160;</p></div>
+</div>
+<ng-include src="'league.html'"></ng-include>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    Actions
+                </h4>
+            </div>
+            <div class="panel-body">
+                <div id="adminActions" ng-show="isAdmin()">
+                    <h4>
+                        Admin
+                    </h4>
+                    <div id="addReferee">
+                        <h5>
+                            Add Referee
+                        </h5>
+                        <div class="refereeName col-sm-4">
+                            <input type="text" class="form-control" ng-model="refereeName" placeholder="Referee Name">
+                        </div>
+                        <div class="col-sm-5">
+                            <div class="input-group">
+                                <input type="text" class="form-control" ng-model="refereeAddress" placeholder="Referee Address">
+                                <span class="input-group-btn">
+                                    <button id="join" class="btn btn-primary" type="button" ng-click="addReferee(refereeName, refereeAddress)">Add</button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

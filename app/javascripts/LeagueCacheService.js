@@ -1,4 +1,4 @@
-angular.module('EtherLeagueServices').service('leagueData', [function() {
+angular.module('EtherLeagueServices').service('leagueCacheService', [function() {
   var leagueDetails = {};
 
   this.put = function(id, league) {
