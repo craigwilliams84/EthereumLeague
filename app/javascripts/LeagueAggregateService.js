@@ -38,15 +38,6 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
     });
   };
 
-  this.addResult = function(leagueId, homeParticipantId, homeScore, awayParticipantId, awayScore) {
-    var resultAgg = ResultAggregate.deployed();
-
-    return resultAgg.addResult(leagueId, homeParticipantId, homeScore, awayParticipantId, awayScore, {
-      from: accountsService.getMainAccount(),
-      gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
-    });
-  };
-
   this.getMyLeagues = function() {
     var myLeagues = [];
     return accountsService.whenInitialised()
@@ -105,6 +96,30 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
       });
     });
   };
+
+  this.getParticipantIdsInLeagueForUser = function(leagueId) {
+    return new Promise(function(resolve, reject) {
+      var participantIds = LeagueAggregate.deployed();
+
+      var onLeagueJoinedEvent = leagueAgg.OnLeagueJoined({leagueId: leagueId, participantAddress: "0x" + accountsService.getMainAccount()},
+        {fromBlock: 0, toBlock: web3.eth.getBlockNumber()});
+
+      onLeagueJoinedEvent.get(function(err, logs) {
+        if (err) {
+          reject(err);
+        } else {
+          var participantIds = new Set();
+
+          logs.forEach(function(log) {
+            //Convert to string as Set doesn't seem to be able to figure out when 2 BigInteger values are equal
+            participantIds.add(log.args.participantId.toString());
+          });
+
+          resolve([...participantIds.values()]);
+        }
+      });
+    });
+  }
 
   this.getRefereeLeagueIds = function() {
     return new Promise(function(resolve, reject) {

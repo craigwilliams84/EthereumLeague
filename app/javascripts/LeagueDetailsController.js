@@ -1,4 +1,4 @@
-angular.module('etherLeagueApp').controller('leagueDetailsCtrl', ['$scope', '$routeParams', '$timeout', 'leagueAggregateService', 'leagueListCtrlCommon', function($scope, $routeParams, $timeout, leagueAggregateService, leagueListCtrlCommon) {
+angular.module('etherLeagueApp').controller('leagueDetailsCtrl', ['$scope', '$routeParams', '$timeout', 'leagueAggregateService', 'resultAggregateService', function($scope, $routeParams, $timeout, leagueAggregateService, resultAggregateService) {
   $scope.leagues = [];
 
   $scope.refreshLeagues = function() {
@@ -25,7 +25,19 @@ angular.module('etherLeagueApp').controller('leagueDetailsCtrl', ['$scope', '$ro
 
   $scope.addResult = function(homeParticipantId, homeScore, awayParticipantId, awayScore) {
     $scope.$parent.showInfoMessage("Add result transaction sent....");
-    leagueAggregateService.addResult($scope.getLeague().id, homeParticipantId, homeScore, awayParticipantId, awayScore)
+    resultAggregateService.addResult($scope.getLeague().id, homeParticipantId, homeScore, awayParticipantId, awayScore)
+      .then(function() {
+        console.log("Result added successfully");
+        $scope.$parent.showSuccessMessage("Result added successfully");
+        $scope.refreshAll();
+      }).catch(function(e) {
+      console.error(e);
+      $scope.$parent.showErrorMessage("There was an error when adding the result");
+    });
+  };
+
+  $scope.getPendingResultsForUser = function() {
+    resultAggregateService.addResult($scope.getLeague().id, homeParticipantId, homeScore, awayParticipantId, awayScore)
       .then(function() {
         console.log("Result added successfully");
         $scope.$parent.showSuccessMessage("Result added successfully");
