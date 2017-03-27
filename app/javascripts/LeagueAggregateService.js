@@ -38,6 +38,15 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
     });
   };
 
+  this.addResult = function(leagueId, homeParticipantId, homeScore, awayParticipantId, awayScore) {
+    var resultAgg = ResultAggregate.deployed();
+
+    return resultAgg.addResult(leagueId, homeParticipantId, homeScore, awayParticipantId, awayScore, {
+      from: accountsService.getMainAccount(),
+      gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
+    });
+  };
+
   this.getMyLeagues = function() {
     var myLeagues = [];
     return accountsService.whenInitialised()

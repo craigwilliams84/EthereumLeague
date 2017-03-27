@@ -41,6 +41,7 @@ angular.module('EtherLeagueServices', []).service('accountsService', ['$window',
       web3.setProvider(provider);
       // And since Truffle v2 uses EtherPudding v3, we also need the line:
       LeagueAggregate.setProvider(provider);
+      ResultAggregate.setProvider(provider);
 
       // Generate the first address out of the seed
       ks.generateNewAddress(pwDerivedKey);

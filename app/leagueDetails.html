@@ -40,16 +40,44 @@
                         <h5>
                             Add Referee
                         </h5>
-                        <div class="refereeName col-sm-4">
-                            <input type="text" class="form-control" ng-model="refereeName" placeholder="Referee Name">
+                        <div class="actionsFirstInput col-sm-4">
+                            <input type="text" class="form-control" ng-model="refereeName" placeholder="Referee Name"/>
                         </div>
                         <div class="col-sm-5">
                             <div class="input-group">
-                                <input type="text" class="form-control" ng-model="refereeAddress" placeholder="Referee Address">
+                                <input type="text" class="form-control" ng-model="refereeAddress" placeholder="Referee Address"/>
                                 <span class="input-group-btn">
                                     <button id="join" class="btn btn-primary" type="button" ng-click="addReferee(refereeName, refereeAddress)">Add</button>
                                 </span>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div id="refereeActions" ng-show="isReferee()">
+                    <h4>
+                        Referee
+                    </h4>
+                    <div id="addResult">
+                        <h5>
+                            Add Result
+                        </h5>
+                        <div class="actionsFirstInput col-sm-1">
+                            <input type="text" class="form-control" ng-model="homeId" placeholder="Home Id"/>
+                        </div>
+                        <div class="col-sm-1">
+                            <input type="text" class="form-control" ng-model="homeScore" placeholder="Home Score"/>
+                        </div>
+                        <div class="col-sm-1">
+                            <input type="text" class="form-control" ng-model="awayId" placeholder="Away Id"/>
+                        </div>
+                        <div class="col-sm-1">
+                            <input type="text" class="form-control" ng-model="awayScore" placeholder="Away Score"/>
+                        </div>
+                        <div class="col-sm-5">
+                            <button id="addResult" class="btn btn-primary" type="button"
+                                    ng-click="addResult(homeId, homeScore, awayId, awayScore)">Add</button>
                         </div>
                     </div>
                 </div>

@@ -8,7 +8,7 @@ angular.module('etherLeagueApp').controller('leagueDetailsCtrl', ['$scope', '$ro
 
   $scope.getLeague = function() {
     return $scope.leagues[0];
-  }
+  };
 
   $scope.addReferee = function(refereeName, refereeAddress) {
     $scope.$parent.showInfoMessage("Add referee transaction sent....");
@@ -23,6 +23,19 @@ angular.module('etherLeagueApp').controller('leagueDetailsCtrl', ['$scope', '$ro
       });
   };
 
+  $scope.addResult = function(homeParticipantId, homeScore, awayParticipantId, awayScore) {
+    $scope.$parent.showInfoMessage("Add result transaction sent....");
+    leagueAggregateService.addResult($scope.getLeague().id, homeParticipantId, homeScore, awayParticipantId, awayScore)
+      .then(function() {
+        console.log("Result added successfully");
+        $scope.$parent.showSuccessMessage("Result added successfully");
+        $scope.refreshAll();
+      }).catch(function(e) {
+      console.error(e);
+      $scope.$parent.showErrorMessage("There was an error when adding the result");
+    });
+  };
+
   $scope.shouldHideLeagueHeader = function() {
     return true;
   };
@@ -31,7 +44,13 @@ angular.module('etherLeagueApp').controller('leagueDetailsCtrl', ['$scope', '$ro
     if ($scope.getLeague()) {
       return $scope.getLeague().userRoles.indexOf(ADMIN) > -1;
     }
-  }
+  };
+
+  $scope.isReferee = function() {
+    if ($scope.getLeague()) {
+      return $scope.getLeague().userRoles.indexOf(REFEREE) > -1;
+    }
+  };
 
   var init = function() {
     leagueAggregateService.getLeagueDetails($routeParams.leagueId, true)
