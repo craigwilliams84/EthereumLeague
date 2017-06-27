@@ -55,16 +55,16 @@ contract('ResultAggregate', function(accounts) {
   
   it("should be able to accept result second", mockRedeploy(true, true, function(done, resultAgg){    	
     resultAgg.addResult(1, 2, 3, 4, 5, {from: accounts[0], gas: 3000000}).then(function() {
-    	return resultAgg.getPendingResultIds.call(1).then(function(resultIds) {
+    	return resultAgg.getPendingResultIds.call(1)
+    }).then(function(resultIds) {
     		return resultAgg.acceptResult(1, resultIds[0], {from: accounts[0], gas: 3000000}).then(function() {
-    			return resultAgg.acceptResult(1, resultIds[0], {from: accounts[1], gas: 3000000}).then(function() {
-    				return resultAgg.getResultDetails.call(1, resultIds[0]).then(function(resultDetails) {
+    			return resultAgg.acceptResult(1, resultIds[0], {from: accounts[1], gas: 3000000})
+        }).then(function() {
+    				return resultAgg.getResultDetails.call(1, resultIds[0])
+        }).then(function(resultDetails) {
     					assert.equal(resultDetails[0], 2, "Status not changed correctly (to accepted)");
     					done();
-    				});
-    			});
-    		});
-    	});
+        });
     }).catch(function(err) {
     	done(err);
   	});

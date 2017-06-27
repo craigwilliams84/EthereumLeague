@@ -99,7 +99,7 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
 
   this.getParticipantIdsInLeagueForUser = function(leagueId) {
     return new Promise(function(resolve, reject) {
-      var participantIds = LeagueAggregate.deployed();
+      var leagueAgg = LeagueAggregate.deployed();
 
       var onLeagueJoinedEvent = leagueAgg.OnLeagueJoined({leagueId: leagueId, participantAddress: "0x" + accountsService.getMainAccount()},
         {fromBlock: 0, toBlock: web3.eth.getBlockNumber()});
@@ -119,7 +119,7 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
         }
       });
     });
-  }
+  };
 
   this.getRefereeLeagueIds = function() {
     return new Promise(function(resolve, reject) {
@@ -194,7 +194,7 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
           'id': id.toString(),
           name: toAscii(leagueDetails[0]),
           participantIds: leagueDetails[1],
-          participantNames: leagueDetails[2],
+          participantNames: toAsciiArray(leagueDetails[2]),
           participantScores: leagueDetails[3],
           entryFee: leagueDetails[4],
           status: getStatus(leagueDetails[5]),
@@ -269,7 +269,7 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
   };
 
   var createLeagueEntry = function(id, name, score) {
-    return {'id': id, 'name': toAscii(name), 'score': score};
+    return {'id': id, 'name': name, 'score': score};
   };
   
   var getStatus = function(statusCode) {
@@ -278,6 +278,12 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
     } else if (statusCode == 1) {
       return "IN PROGRESS";
     }
+  }
+
+  var toAsciiArray = function(bytesArray) {
+    return bytesArray.map(function(bytesValue) {
+      return toAscii(bytesValue);
+    });
   }
 
 }]);

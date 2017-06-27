@@ -31,6 +31,7 @@ module.exports = {
     "etherLeagueServices.js" :[
       "javascripts/AccountsService.js",
       "javascripts/LeagueAggregateService.js",
+      "javascripts/ResultAggregateService.js"
     ],
     "LeagueData.js": "javascripts/LeagueCacheService.js",
     "etherLeague.js": [

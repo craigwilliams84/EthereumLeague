@@ -13,7 +13,7 @@
             <div class="panel-body">
                 <table class="table">
                     <tr ng-repeat="entry in getLeague().entries">
-                        <td>{{ entry.name }}</td>
+                        <td>{{ entry.name }} (id: {{ entry.id }})</td>
                         <td>{{ entry.score.toString() }}</td>
                     </tr>
                 </table>
@@ -23,6 +23,39 @@
     <div class="col-sm-3"><p>&#160;</p></div>
 </div>
 <ng-include src="'league.html'"></ng-include>
+<div class="row" ng-show="hasPendingResults()">
+    <div class="col-sm-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    Pending Results
+                </h4>
+            </div>
+            <div class="panel-body">
+                <div class="row" ng-repeat="result in pendingResults">
+                    <div class="col-sm-3 text-center" >
+                        {{ getParticipantName(result.homeParticipantId) }}
+                    </div>
+                    <div class="col-sm-2 text-center">
+                        {{ result.homeScore.toString() }}
+                    </div>
+                    <div class="col-sm-1 text-center">
+                        v
+                    </div>
+                    <div class="col-sm-2 text-center">
+                        {{ result.awayScore.toString() }}
+                    </div>
+                    <div class="col-sm-3 text-center">
+                        {{ getParticipantName(result.awayParticipantId) }}
+                    </div>
+                    <div class="col-sm-1">
+                        <button ng-show="canAcceptPendingResult(result)" id="acceptResult" class="btn btn-primary" type="button" ng-click="acceptResult(result.id)">Accept</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="row">
     <div class="col-sm-12">
         <div class="panel panel-default">
