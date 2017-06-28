@@ -83,8 +83,8 @@ contract ResultAggregate {
         result.status = status;
 
         if (status == ResultStatus.ACCEPTED) {
-            leagueAggregate.addResult(result.leagueId, result.homeParticipantId, 
-                result.homeScore, result.awayParticipantId, result.awayScore);
+            leagueAggregate.addResult(result.leagueId, result.homeParticipantId,
+              result.homeScore, result.awayParticipantId, result.awayScore);
         }
     }
     

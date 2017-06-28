@@ -1,6 +1,6 @@
 contract('ResultAggregate', function(accounts) {
 
-  it("should be able to add a new result", mockRedeploy(true, true, function(done, resultAgg){    	
+  it("should be able to add a new result", mockRedeploy(true, true, function(done, resultAgg){
     resultAgg.addResult(1, 2, 3, 4, 5, {from: accounts[0], gas: 3000000}).then(function() {
     	return resultAgg.getPendingResultIds.call(1).then(function(resultIds) {
     		assert.equal(resultIds.length, 1, "Result not added correctly");
@@ -10,8 +10,8 @@ contract('ResultAggregate', function(accounts) {
     	done(err);
   	});
   }));
-  
-  it("should not be able to add a new result if not referee", mockRedeploy(true, false, function(done, resultAgg){    	
+
+  it("should not be able to add a new result if not referee", mockRedeploy(true, false, function(done, resultAgg){
     resultAgg.addResult(1, 2, 3, 4, 5, {from: accounts[0], gas: 3000000}).then(function() {
     	done("Result was added successfully when it should have failed");
     }).catch(function(err) {
@@ -19,8 +19,8 @@ contract('ResultAggregate', function(accounts) {
     	done();
   	});
   }));
-  
-  it("should be able to get result details", mockRedeploy(true, true, function(done, resultAgg){    	
+
+  it("should be able to get result details", mockRedeploy(true, true, function(done, resultAgg){
     resultAgg.addResult(1, 2, 3, 4, 5, {from: accounts[0], gas: 3000000}).then(function() {
     	return resultAgg.getPendingResultIds.call(1).then(function(resultIds) {
     		return resultAgg.getResultDetails.call(1, resultIds[0]).then(function(resultDetails) {
@@ -36,8 +36,8 @@ contract('ResultAggregate', function(accounts) {
     	done(err);
   	});
   }));
-  
-  it("should be able to accept result first", mockRedeploy(true, true, function(done, resultAgg){    	
+
+  it("should be able to accept result first", mockRedeploy(true, true, function(done, resultAgg){
     resultAgg.addResult(1, 2, 3, 4, 5, {from: accounts[0], gas: 3000000}).then(function() {
     	return resultAgg.getPendingResultIds.call(1).then(function(resultIds) {
     		return resultAgg.acceptResult(1, resultIds[0], {from: accounts[0], gas: 3000000}).then(function() {
@@ -53,7 +53,7 @@ contract('ResultAggregate', function(accounts) {
   	});
   }));
   
-  it("should be able to accept result second", mockRedeploy(true, true, function(done, resultAgg){    	
+  it("should be able to accept result second", mockRedeploy(true, true, function(done, resultAgg, mockLeagueAgg){
     resultAgg.addResult(1, 2, 3, 4, 5, {from: accounts[0], gas: 3000000}).then(function() {
     	return resultAgg.getPendingResultIds.call(1)
     }).then(function(resultIds) {
@@ -62,33 +62,37 @@ contract('ResultAggregate', function(accounts) {
         }).then(function() {
     				return resultAgg.getResultDetails.call(1, resultIds[0])
         }).then(function(resultDetails) {
-    					assert.equal(resultDetails[0], 2, "Status not changed correctly (to accepted)");
-    					done();
-        });
+					assert.equal(resultDetails[0], 2, "Status not changed correctly (to accepted)");
+					return mockLeagueAgg.hasAddResultBeenCalled.call();
+        }).then(function(hasAddResultBeenCalled) {
+					assert.equal(true, hasAddResultBeenCalled);
+					done();
+				});
     }).catch(function(err) {
     	done(err);
   	});
   }));
-  
-  it("should not be able to accept result if the sender does not match a participant address", mockRedeploy(false, true, function(done, resultAgg){    	
-    resultAgg.addResult(1, 2, 3, 4, 5, {from: accounts[0], gas: 3000000}).then(function() {
-    	return resultAgg.getPendingResultIds.call(1).then(function(resultIds) {
-    		return resultAgg.acceptResult(1, resultIds[0], {from: accounts[0], gas: 3000000}).then(function() {
-    			done("Result was accepted by non participant address");
-    		});
-    	});
-    }).catch(function(err) {
-    	//Expected
-    	done();
-  	});
-  }));
+
+	it("should not be able to accept result if the sender does not match a participant address", mockRedeploy(false, true, function(done, resultAgg){
+		resultAgg.addResult(1, 2, 3, 4, 5, {from: accounts[0], gas: 3000000}).then(function() {
+			return resultAgg.getPendingResultIds.call(1).then(function(resultIds) {
+				return resultAgg.acceptResult(1, resultIds[0], {from: accounts[0], gas: 3000000}).then(function() {
+					done("Result was accepted by non participant address");
+				});
+			});
+		}).catch(function(err) {
+			//Expected
+			done();
+		});
+	}));
+
 });
 
 function mockRedeploy(isParticipantAddress, isReferee, testFunction) {
 	var wrappedFunction = function(done) {
 		MockLeagueAggregate.new(isParticipantAddress, isReferee).then(function (leagueAggregate) {
 			ResultAggregate.new(leagueAggregate.address).then(function (newResultAggregate) {
-				testFunction(done, newResultAggregate);
+				testFunction(done, newResultAggregate, leagueAggregate);
     		});
     	});
 	}

@@ -6,7 +6,7 @@ contract MockLeagueAggregate is LeagueAggregateI {
     address owner;
     bool private isLeagueParticipantAddressValue;
     bool private isRefereeValue;
-    
+    bool private addResultCalled;
 
     function MockLeagueAggregate(bool isParticipantAddress, bool isReferee) {
         owner = msg.sender;
@@ -24,7 +24,11 @@ contract MockLeagueAggregate is LeagueAggregateI {
     
     function addResult(uint leagueId, uint homeParticipantId, 
         uint16 homeParticipantScore, uint awayParticipantId, uint16 awayParticipantScore) {
-        ResultAdded();
+        addResultCalled = true;
+    }
+
+    function hasAddResultBeenCalled() returns (bool) {
+        return addResultCalled;
     }
 
     function killMe() {
@@ -32,6 +36,4 @@ contract MockLeagueAggregate is LeagueAggregateI {
             suicide(owner);
         }
     }
-
-    event ResultAdded();
 }
