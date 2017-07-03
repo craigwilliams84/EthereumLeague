@@ -264,7 +264,7 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
     }
 
     leagueDetails.entries.sort(function(a, b) {
-      return a.score - b.score;
+      return b.score - a.score;
     });
   };
 
