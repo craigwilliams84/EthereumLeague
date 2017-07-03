@@ -8,7 +8,7 @@
                 <input type="text" id="name" ng-model="name" placeholder="e.g., Premier League"/>
                 <h5>Points For Win:</h5>
                 <input type="text" id="pointsForWin" ng-model="pointsForWin" placeholder="e.g., 3"/>
-                <br><br><button id="add" class="btn btn-primary" ng-click="addLeague(name, pointsForWin, pointsForDraw, entryFee, numOfEntrants)">Add</button>
+                <br><br><button id="add" class="btn btn-primary" ng-click="addLeague(name, pointsForWin, pointsForDraw, entryFee, numOfEntrants, timesToPlay)">Add</button>
             </div>
             <div class="col-sm-4">
                 <h5>Entry Fee (Wei):</h5>
@@ -19,6 +19,8 @@
             <div class="col-sm-4">
                 <h5>Number of Entrants:</h5>
                 <input type="text" id="numOfEntrants" ng-model="numOfEntrants" placeholder="e.g., 10"/>
+                <h5>Number of Times To Play Each Participant:</h5>
+                <input type="text" id="timesToPlay" ng-model="timesToPlay" placeholder="e.g., 2"/>
             </div>
         </div>
     </div>

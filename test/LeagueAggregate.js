@@ -3,7 +3,7 @@ contract('LeagueAggregate', function(accounts) {
   it("should be able to add a new league", function(done){
     leagueAgg = LeagueAggregate.deployed();    
     	
-    leagueAgg.addLeague(fromAscii("Test League"), 3, 1, 1000000, 10, {from: accounts[0], gas: 3000000}).then(function() {
+    addLeague(leagueAgg).then(function() {
     	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
     		assert.equal(leagueIds.length, 1, "League not added correctly");		
     		done();
@@ -14,7 +14,7 @@ contract('LeagueAggregate', function(accounts) {
   });
   
   it("should be able to add a referee to a league", redeploy(accounts[0], function(done, leagueAgg){    	
-    leagueAgg.addLeague(fromAscii("Test League"), 3, 1, 1000000, 10, {from: accounts[0], gas: 3000000}).then(function() {
+    addLeague(leagueAgg).then(function() {
     	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
     		return leagueAgg.addRefereeToLeague(leagueIds[0], accounts[1], {from: accounts[0], gas: 3000000}).then(function() {
     			return leagueAgg.isRefereeAddress.call(leagueIds[0], accounts[1]).then(function(isReferee) {
@@ -29,7 +29,7 @@ contract('LeagueAggregate', function(accounts) {
   }));
   
   it("should not be able to add a referee to a league from non admin address", redeploy(accounts[0], function(done, leagueAgg){    	
-    leagueAgg.addLeague(fromAscii("Test League"), 3, 1, 1000000, 10, {from: accounts[0], gas: 3000000}).then(function() {
+    addLeague(leagueAgg).then(function() {
     	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
     		return leagueAgg.addRefereeToLeague(leagueIds[0], accounts[1], {from: accounts[1], gas: 3000000}).then(function() {
     			done("Referee was added from a non admin account, error!");
@@ -44,7 +44,7 @@ contract('LeagueAggregate', function(accounts) {
   it("should be able to join a league", redeploy(accounts[0], function(done, leagueAgg){    
     var participantName =  "Tottenham Hotspur";
     	
-    leagueAgg.addLeague(fromAscii("Test League", 32), 3, 1, 1000000, 10, {from: accounts[0], gas: 3000000}).then(function() {
+		addLeague(leagueAgg).then(function() {
     	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
     		return leagueAgg.joinLeague(leagueIds[0], fromAscii(participantName), {from: accounts[1], gas: 3000000, value: 1000000}).then(function() {
     			return leagueAgg.doesLeagueContainParticipant.call(leagueIds[0], fromAscii(participantName)).then(function(doesExist) {
@@ -59,7 +59,7 @@ contract('LeagueAggregate', function(accounts) {
   }));
 
 	it("should progress status to IN_PROGRESS (1) when league is full", redeploy(accounts[0], function(done, leagueAgg){
-		leagueAgg.addLeague(fromAscii("Test League", 32), 3, 1, 1000000, 2, {from: accounts[0], gas: 3000000}).then(function() {
+		addLeague(leagueAgg).then(function() {
 			return leagueAgg.getLeaguesForAdmin.call(accounts[0]);
 		}).then(function(leagueIds) {
 			return leagueAgg.joinLeague(leagueIds[0], fromAscii("Participant1"), {from: accounts[1], gas: 3000000, value: 1000000}).then(function(){
@@ -74,7 +74,7 @@ contract('LeagueAggregate', function(accounts) {
 	}));
 
 	it("should not allow participants to join when league is IN_PROGRESS", redeploy(accounts[0], function(done, leagueAgg){
-		leagueAgg.addLeague(fromAscii("Test League", 32), 3, 1, 1000000, 2, {from: accounts[0], gas: 3000000}).then(function() {
+		addLeague(leagueAgg).then(function() {
 			return leagueAgg.getLeaguesForAdmin.call(accounts[0]);
 		}).then(function(leagueIds) {
 			return leagueAgg.joinLeague(leagueIds[0], fromAscii("Participant1"), {from: accounts[1], gas: 3000000, value: 1000000}).then(function(){
@@ -96,7 +96,7 @@ contract('LeagueAggregate', function(accounts) {
   it("should be able to establish when a participant address is valid", redeploy(accounts[0], function(done, leagueAgg){    
     var participantName =  "Tottenham Hotspur";
     	
-    leagueAgg.addLeague(fromAscii("Test League", 32), 3, 1, 1000000, 10, {from: accounts[0], gas: 3000000}).then(function() {
+    addLeague(leagueAgg).then(function() {
     	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
     		return leagueAgg.joinLeague(leagueIds[0], fromAscii(participantName), {from: accounts[1], gas: 3000000, value: 1000000}).then(function() {
     			return leagueAgg.getLeagueDetails.call(leagueIds[0]).then(function(leagueDetails) {
@@ -115,7 +115,7 @@ contract('LeagueAggregate', function(accounts) {
   it("should be able to establish when a participant address is invalid", redeploy(accounts[0], function(done, leagueAgg){    
     var participantName =  "Tottenham Hotspur";
     	
-    leagueAgg.addLeague(fromAscii("Test League", 32), 3, 1, 1000000, 10, {from: accounts[0], gas: 3000000}).then(function() {
+    addLeague(leagueAgg).then(function() {
     	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
     		return leagueAgg.joinLeague(leagueIds[0], fromAscii(participantName), {from: accounts[1], gas: 3000000, value: 1000000}).then(function() {
     			return leagueAgg.getLeagueDetails.call(leagueIds[0]).then(function(leagueDetails) {
@@ -134,7 +134,7 @@ contract('LeagueAggregate', function(accounts) {
   it("should not be able to join a league if the value of transaction is less then entry fee", redeploy(accounts[0], function(done, leagueAgg){    
     var participantName =  "Tottenham Hotspur";
     	
-    leagueAgg.addLeague(fromAscii("Test League", 32), 3, 1, 1000000, 10, {from: accounts[0], gas: 3000000}).then(function() {
+    addLeague(leagueAgg).then(function() {
     	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
     		return leagueAgg.joinLeague(leagueIds[0], fromAscii(participantName), {from: accounts[1], gas: 3000000, value: 900000}).then(function() {
     			return leagueAgg.doesLeagueContainParticipant.call(leagueIds[0], fromAscii(participantName)).then(function(doesExist) {
@@ -151,7 +151,7 @@ contract('LeagueAggregate', function(accounts) {
   it("should be able to join a league if the transaction value is higher than entry fee", redeploy(accounts[0], function(done, leagueAgg){    
     var participantName =  "Tottenham Hotspur";
     	
-    leagueAgg.addLeague(fromAscii("Test League", 32), 3, 1, 1000000, 10, {from: accounts[0], gas: 3000000}).then(function() {
+    addLeague(leagueAgg).then(function() {
     	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
     		return leagueAgg.joinLeague(leagueIds[0], fromAscii(participantName), {from: accounts[1], gas: 3000000, value: 1500000}).then(function() {
     			return leagueAgg.doesLeagueContainParticipant.call(leagueIds[0], fromAscii(participantName)).then(function(doesExist) {
@@ -166,7 +166,7 @@ contract('LeagueAggregate', function(accounts) {
   }));
   
   it("should be able to add result (home win)", redeploy(accounts[0], function(done, leagueAgg){
-    leagueAgg.addLeague(fromAscii("Test League", 32), 3, 1, 1000000, 10, {from: accounts[0], gas: 3000000}).then(function() {
+    addLeague(leagueAgg).then(function() {
     	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
     		return leagueAgg.joinLeague(leagueIds[0], fromAscii("Tottenham Hotspur"), {from: accounts[1], gas: 3000000, value: 1000000}).then(function() {
     			return leagueAgg.joinLeague(leagueIds[0], fromAscii("Arsenal"), {from: accounts[2], gas: 3000000, value: 1000000}).then(function() {
@@ -193,7 +193,7 @@ contract('LeagueAggregate', function(accounts) {
   }));
   
   it("should be able to add result (draw)", redeploy(accounts[0], function(done, leagueAgg){
-    leagueAgg.addLeague(fromAscii("Test League", 32), 3, 1, 1000000, 10, {from: accounts[0], gas: 3000000}).then(function() {
+    addLeague(leagueAgg).then(function() {
     	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
     		return leagueAgg.joinLeague(leagueIds[0], fromAscii("Tottenham Hotspur"), {from: accounts[1], gas: 3000000, value: 1000000}).then(function() {
     			return leagueAgg.joinLeague(leagueIds[0], fromAscii("Arsenal"), {from: accounts[2], gas: 3000000, value: 1000000}).then(function() {
@@ -220,7 +220,7 @@ contract('LeagueAggregate', function(accounts) {
   }));
   
   it("should not be allowed to add a result from any address other than the result aggregate", redeploy(accounts[0], function(done, leagueAgg){
-    leagueAgg.addLeague(fromAscii("Test League", 32), 3, 1, 1000000, 10, {from: accounts[0], gas: 3000000}).then(function() {
+    addLeague(leagueAgg).then(function() {
     	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
     		return leagueAgg.joinLeague(leagueIds[0], fromAscii("Tottenham Hotspur"), {from: accounts[1], gas: 3000000, value: 1000000}).then(function() {
     			return leagueAgg.joinLeague(leagueIds[0], fromAscii("Arsenal"), {from: accounts[2], gas: 3000000, value: 1000000}).then(function() {
@@ -243,7 +243,7 @@ contract('LeagueAggregate', function(accounts) {
   }));
   
   it("should be able to retrieve a leagues details", redeploy(accounts[0], function(done, leagueAgg){
-    leagueAgg.addLeague(fromAscii("Test League", 32), 3, 1, 1000000, 10, {from: accounts[0], gas: 3000000}).then(function() {
+    addLeague(leagueAgg).then(function() {
     	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
     		return leagueAgg.joinLeague(leagueIds[0], fromAscii("Tottenham Hotspur"), {from: accounts[1], gas: 3000000, value: 1000000}).then(function() {
     			return leagueAgg.joinLeague(leagueIds[0], fromAscii("Arsenal"), {from: accounts[2], gas: 3000000, value: 1000000}).then(function() {
@@ -269,9 +269,11 @@ contract('LeagueAggregate', function(accounts) {
     								
     								assert.equal(leagueDetailsUpdated[4], 1000000, "Entry fee not returned correctly");
 
-										assert.equal(leagueDetailsUpdated[5], 0, "League status not returned correctly");
+										assert.equal(leagueDetailsUpdated[5], 1, "League status not returned correctly");
 
-										assert.equal(leagueDetailsUpdated[6], 10, "Number of entrants not returned correctly");
+										assert.equal(leagueDetailsUpdated[6], 2, "Number of entrants not returned correctly");
+
+										assert.equal(leagueDetailsUpdated[7], 2, "Number of times particpiants play each other not returned correctly");
     								done();
     							});
     						});
@@ -284,6 +286,10 @@ contract('LeagueAggregate', function(accounts) {
     	done(err);
   	});
   }));
+
+	function addLeague(leagueAgg) {
+		return leagueAgg.addLeague(fromAscii("Test League", 32), 3, 1, 1000000, 2, 2, {from: accounts[0], gas: 3000000});
+	}
 });
 
 function redeploy(deployer, testFunction) {

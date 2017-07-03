@@ -12,6 +12,7 @@ contract LeagueAggregate is LeagueAggregateI {
         uint8 pointsForWin;
         uint8 pointsForDraw;
         uint8 numOfEntrants;
+        uint8 timesToPlayEachParticipant;
         address adminAddress;
         address[] referees;
         Participant[] participants;
@@ -42,7 +43,7 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
     }
 
     function addLeague(bytes32 name,
-      uint8 pointsForWin, uint8 pointsForDraw, uint entryFee, uint8 numOfEntrants) {
+      uint8 pointsForWin, uint8 pointsForDraw, uint entryFee, uint8 numOfEntrants, uint8 timesToPlayEachParticipant) {
         uint id = getNewLeagueId();
         leagues.length = leagues.length + 1;
         leagues[id].id = id;
@@ -51,6 +52,7 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
         leagues[id].pointsForDraw = pointsForDraw;
         leagues[id].entryFee = entryFee;
         leagues[id].numOfEntrants = numOfEntrants;
+        leagues[id].timesToPlayEachParticipant = timesToPlayEachParticipant;
         leagues[id].adminAddress = msg.sender;
 
         OnLeagueAdded(id);
@@ -178,7 +180,7 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
         return leagueIds;
     }
 
-    function getLeagueDetails(uint leagueId) constant returns (bytes32 name, uint[] participantIds, bytes32[] participantNames, uint16[] participantScores, uint entryFee, LeagueStatus status, uint8 numOfEntrants) {
+    function getLeagueDetails(uint leagueId) constant returns (bytes32 name, uint[] participantIds, bytes32[] participantNames, uint16[] participantScores, uint entryFee, LeagueStatus status, uint8 numOfEntrants, uint8 timesToPlayEachParticpiant) {
 
         League league = leagues[leagueId];
         uint[] memory partIds = new uint[](league.participants.length);
@@ -192,7 +194,7 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
             partScores[i] = league.scores[participant.id];
         }
 
-        return(league.name, partIds, partNames, partScores, league.entryFee, league.status, league.numOfEntrants);
+        return(league.name, partIds, partNames, partScores, league.entryFee, league.status, league.numOfEntrants, league.timesToPlayEachParticipant);
     }
 
     function updateLeagueStatus(uint leagueId, LeagueStatus leagueStatus) private {

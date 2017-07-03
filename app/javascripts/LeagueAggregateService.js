@@ -3,10 +3,10 @@ const REFEREE = "Referee";
 const PARTICIPANT= "Participant";
 
 angular.module('EtherLeagueServices').service('leagueAggregateService', ['accountsService', 'leagueCacheService', function(accountsService, leagueCacheService) {
-  this.addLeague = function(name, pointsForWin, pointsForDraw, entryFee, numOfEntrants, callback) {
+  this.addLeague = function(name, pointsForWin, pointsForDraw, entryFee, numOfEntrants, timesToPlay, callback) {
     var leagueAgg = LeagueAggregate.deployed();
 
-    leagueAgg.addLeague(fromAscii(name), pointsForWin, pointsForDraw, entryFee, numOfEntrants, {
+    leagueAgg.addLeague(fromAscii(name), pointsForWin, pointsForDraw, entryFee, numOfEntrants, timesToPlay, {
       from: accountsService.getMainAccount(),
       gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
     }).then(function() {

@@ -6,9 +6,9 @@ angular.module('etherLeagueApp').controller('adminCtrl', ['$scope', '$routeParam
     init();
   };
 
-  $scope.addLeague = function(name, pointsForWin, pointsForDraw, entryFee, numOfEntrants) {
+  $scope.addLeague = function(name, pointsForWin, pointsForDraw, entryFee, numOfEntrants, timesToPlay) {
     $scope.$parent.showInfoMessage("League creation transaction sent....");
-    leagueAggregateService.addLeague(name, pointsForWin, pointsForDraw, entryFee, numOfEntrants, function(err) {
+    leagueAggregateService.addLeague(name, pointsForWin, pointsForDraw, entryFee, numOfEntrants, timesToPlay, function(err) {
 
       if (err) {
         console.error(err);
