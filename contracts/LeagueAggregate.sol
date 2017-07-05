@@ -197,6 +197,10 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
         return(league.name, partIds, partNames, partScores, league.entryFee, league.status, league.numOfEntrants, league.timesToPlayEachParticipant);
     }
 
+    function getAvailableFunds() constant returns (uint) {
+        return availableFunds[msg.sender];
+    }
+
     function updateLeagueStatus(uint leagueId, LeagueStatus leagueStatus) private {
         leagues[leagueId].status = leagueStatus;
     }

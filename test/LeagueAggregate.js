@@ -59,17 +59,9 @@ contract('LeagueAggregate', function(accounts) {
   }));
 
 	it("should progress status to IN_PROGRESS (1) when league is full", redeploy(accounts[0], function(done, leagueAgg){
-		addLeague(leagueAgg).then(function() {
-			return leagueAgg.getLeaguesForAdmin.call(accounts[0]);
-		}).then(function(leagueIds) {
-			return leagueAgg.joinLeague(leagueIds[0], fromAscii("Participant1"), {from: accounts[1], gas: 3000000, value: 1000000}).then(function(){
-				return leagueAgg.joinLeague(leagueIds[0], fromAscii("Participant2"), {from: accounts[1], gas: 3000000, value: 1000000})
-			}).then(function() {
-				return leagueAgg.getLeagueDetails.call(leagueIds[0]);
-			}).then(function(leagueDetails) {
-				assert.equal(leagueDetails[5], 1, "League status not set to IN_PROGRESS correctly");
-				done();
-			});;
+		addAndFillLeague(leagueAgg).then(function(leagueDetails) {
+			assert.equal(leagueDetails.data[5], 1, "League status not set to IN_PROGRESS correctly");
+			done();
 		});
 	}));
 
@@ -166,80 +158,61 @@ contract('LeagueAggregate', function(accounts) {
   }));
   
   it("should be able to add result (home win)", redeploy(accounts[0], function(done, leagueAgg){
-    addLeague(leagueAgg).then(function() {
-    	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
-    		return leagueAgg.joinLeague(leagueIds[0], fromAscii("Tottenham Hotspur"), {from: accounts[1], gas: 3000000, value: 1000000}).then(function() {
-    			return leagueAgg.joinLeague(leagueIds[0], fromAscii("Arsenal"), {from: accounts[2], gas: 3000000, value: 1000000}).then(function() {
-    				return leagueAgg.getLeagueDetails.call(leagueIds[0]).then(function(leagueDetails) {
-    					return leagueAgg.setResultAggregateAddress(accounts[3], {from: accounts[0], gas: 3000000}).then(function() {
-    						//Participant ids
-    						var partIds = leagueDetails[1];
-    						return leagueAgg.addResult(leagueIds[0], partIds[0], 5, partIds[1], 1, {from: accounts[3], gas: 3000000}).then(function() {
-    							return leagueAgg.getLeagueDetails.call(leagueIds[0]).then(function(leagueDetailsUpdated) {
-    								var partScores = leagueDetailsUpdated[3];
-    								assert.equal(partScores[0], 3, "Home team score not update correctly");
-    								assert.equal(partScores[1], 0, "Away team score is not 0");
-    								done();
-    							});
-    						});
-    					});
-    				});
-    			});
-    		});
-    	});
-    }).catch(function(err) {
-    	done(err);
-  	});
+    addAndFillLeague(leagueAgg)
+			.then(function(leagueDetails) {
+				//Participant ids
+				var partIds = leagueDetails.data[1];
+				return leagueAgg.addResult(leagueDetails.id, partIds[0], 5, partIds[1], 1, {from: accounts[3], gas: 3000000})
+					.then(function() {
+						return leagueAgg.getLeagueDetails.call(leagueDetails.id)
+					});
+			})
+			.then(function(leagueDetailsUpdated) {
+				var partScores = leagueDetailsUpdated[3];
+				assert.equal(partScores[0], 3, "Home team score not update correctly");
+				assert.equal(partScores[1], 0, "Away team score is not 0");
+				done();
+			})
+			.catch(function(err) {
+				done(err);
+    	})
   }));
-  
-  it("should be able to add result (draw)", redeploy(accounts[0], function(done, leagueAgg){
-    addLeague(leagueAgg).then(function() {
-    	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
-    		return leagueAgg.joinLeague(leagueIds[0], fromAscii("Tottenham Hotspur"), {from: accounts[1], gas: 3000000, value: 1000000}).then(function() {
-    			return leagueAgg.joinLeague(leagueIds[0], fromAscii("Arsenal"), {from: accounts[2], gas: 3000000, value: 1000000}).then(function() {
-    				return leagueAgg.getLeagueDetails.call(leagueIds[0]).then(function(leagueDetails) {
-    					return leagueAgg.setResultAggregateAddress(accounts[3], {from: accounts[0], gas: 3000000}).then(function() {
-    						//Participant ids
-    						var partIds = leagueDetails[1];
-    						return leagueAgg.addResult(leagueIds[0], partIds[0], 2, partIds[1], 2, {from: accounts[3], gas: 3000000}).then(function() {
-    							return leagueAgg.getLeagueDetails.call(leagueIds[0]).then(function(leagueDetailsUpdated) {
-    								var partScores = leagueDetailsUpdated[3];
-    								assert.equal(partScores[0], 1, "Home team score not update correctly");
-    								assert.equal(partScores[1], 1, "Away team score not update correctly");
-    								done();
-    							});
-    						});
-    					});
-    				});
-    			});
-    		});
-    	});
-    }).catch(function(err) {
-    	done(err);
-  	});
-  }));
+
+	it("should be able to add result (draw)", redeploy(accounts[0], function(done, leagueAgg){
+		addAndFillLeague(leagueAgg)
+			.then(function(leagueDetails) {
+				//Participant ids
+				var partIds = leagueDetails.data[1];
+				return leagueAgg.addResult(leagueDetails.id, partIds[0], 2, partIds[1], 2, {from: accounts[3], gas: 3000000})
+					.then(function() {
+						return leagueAgg.getLeagueDetails.call(leagueDetails.id)
+					});
+			})
+			.then(function(leagueDetailsUpdated) {
+				var partScores = leagueDetailsUpdated[3];
+				assert.equal(partScores[0], 1, "Home team score not update correctly");
+				assert.equal(partScores[1], 1, "Away team score not update correctly");
+				done();
+			})
+			.catch(function(err) {
+				done(err);
+			})
+	}));
   
   it("should not be allowed to add a result from any address other than the result aggregate", redeploy(accounts[0], function(done, leagueAgg){
-    addLeague(leagueAgg).then(function() {
-    	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
-    		return leagueAgg.joinLeague(leagueIds[0], fromAscii("Tottenham Hotspur"), {from: accounts[1], gas: 3000000, value: 1000000}).then(function() {
-    			return leagueAgg.joinLeague(leagueIds[0], fromAscii("Arsenal"), {from: accounts[2], gas: 3000000, value: 1000000}).then(function() {
-    				return leagueAgg.getLeagueDetails.call(leagueIds[0]).then(function(leagueDetails) {
-    					return leagueAgg.setResultAggregateAddress(accounts[3], {from: accounts[0], gas: 3000000}).then(function() {
-    						//Participant ids
-    						var partIds = leagueDetails[1];
-    						return leagueAgg.addResult(leagueIds[0], partIds[0], 2, partIds[1], 2, {from: accounts[0], gas: 3000000}).then(function() {
-    							done("Adding result did not cause an error");
-    						});
-    					});
-    				});
-    			});
-    		});
-    	});
-    }).catch(function(err) {
-    	//This is what we expect
-    	done();
-  	});
+		addAndFillLeague(leagueAgg)
+			.then(function(leagueDetails) {
+				//Participant ids
+				var partIds = leagueDetails.data[1];
+				return leagueAgg.addResult(leagueIds[0], partIds[0], 2, partIds[1], 2, {from: accounts[3], gas: 3000000})
+					.then(function() {
+						done("Adding result did not cause an error");
+					});
+			})
+    	.catch(function(err) {
+    		//This is what we expect
+    		done();
+  		});
   }));
   
   it("should be able to retrieve a leagues details", redeploy(accounts[0], function(done, leagueAgg){
@@ -289,7 +262,29 @@ contract('LeagueAggregate', function(accounts) {
 
 	function addLeague(leagueAgg) {
 		return leagueAgg.addLeague(fromAscii("Test League", 32), 3, 1, 1000000, 2, 2, {from: accounts[0], gas: 3000000});
-	}
+	};
+
+	function addAndFillLeague(leagueAgg) {
+		return addLeague(leagueAgg)
+			.then(function() {
+				return leagueAgg.setResultAggregateAddress(accounts[3], {from: accounts[0], gas: 3000000})
+			})
+			.then(function() {
+				return leagueAgg.getLeaguesForAdmin.call(accounts[0])
+			})
+			.then(function(leagueIds) {
+				return leagueAgg.joinLeague(leagueIds[0], fromAscii("Tottenham Hotspur"), {from: accounts[1], gas: 3000000, value: 1000000})
+					.then(function() {
+						return leagueAgg.joinLeague(leagueIds[0], fromAscii("Arsenal"), {from: accounts[2], gas: 3000000, value: 1000000})
+					})
+					.then(function() {
+						return leagueAgg.getLeagueDetails.call(leagueIds[0])
+					})
+					.then(function(leagueDetails) {
+						return {id: leagueIds[0], data: leagueDetails};
+					});
+			});
+	};
 });
 
 function redeploy(deployer, testFunction) {
