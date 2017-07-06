@@ -41,22 +41,49 @@ contract('LeagueAggregate', function(accounts) {
   	});
   }));
   
-  it("should be able to join a league", redeploy(accounts[0], function(done, leagueAgg){    
-    var participantName =  "Tottenham Hotspur";
-    	
-		addLeague(leagueAgg).then(function() {
-    	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
-    		return leagueAgg.joinLeague(leagueIds[0], fromAscii(participantName), {from: accounts[1], gas: 3000000, value: 1000000}).then(function() {
-    			return leagueAgg.doesLeagueContainParticipant.call(leagueIds[0], fromAscii(participantName)).then(function(doesExist) {
-    				assert.equal(doesExist, true, "Participant has not been added to the league");
-    				done();
-    			});
-    		});
-    	});
-    }).catch(function(err) {
-    	done(err);
-  	});
+  it("should be able to join a league", redeploy(accounts[0], function(done, leagueAgg){
+		var participantName =  "Tottenham Hotspur";
+
+		addLeague(leagueAgg)
+			.then(function(leagueId) {
+				return leagueAgg.joinLeague(leagueId, fromAscii(participantName), {from: accounts[1], gas: 3000000, value: 1000000})
+					.then(function() {
+						return leagueAgg.doesLeagueContainParticipant.call(leagueId, fromAscii(participantName))
+					})
+			})
+			.then(function(doesExist) {
+				assert.equal(doesExist, true, "Participant has not been added to the league");
+				done();
+			})
+			.catch(function(err) {
+				done(err);
+			});
   }));
+
+	it("should be able to join a league and get refunded the excess when sending too much ether", redeploy(accounts[0], function(done, leagueAgg){
+		var participantName =  "Tottenham Hotspur";
+
+		addLeague(leagueAgg)
+			.then(function(leagueId) {
+				return leagueAgg.joinLeague(leagueId, fromAscii(participantName), {from: accounts[1], gas: 3000000, value: 1300000})
+					.then(function() {
+						return leagueAgg.doesLeagueContainParticipant.call(leagueId, fromAscii(participantName))
+					})
+			})
+			.then(function(doesExist) {
+				assert.equal(doesExist, true, "Participant has not been added to the league");
+			})
+			.then(function() {
+				return leagueAgg.getAvailableFunds.call({from: accounts[1]});
+			})
+			.then(function(availableFunds) {
+				assert.equal(availableFunds, 300000, "Excess funds not available to withdraw");
+				done();
+			})
+			.catch(function(err) {
+				done(err);
+			});
+	}));
 
 	it("should progress status to IN_PROGRESS (1) when league is full", redeploy(accounts[0], function(done, leagueAgg){
 		addAndFillLeague(leagueAgg).then(function(leagueDetails) {
@@ -214,6 +241,46 @@ contract('LeagueAggregate', function(accounts) {
     		done();
   		});
   }));
+
+	it("should be able to complete league", redeploy(accounts[0], function(done, leagueAgg){
+		completeLeague(leagueAgg)
+			.then(function(leagueDetailsUpdated) {
+				var status = leagueDetailsUpdated.data[5];
+				assert.equal(status, 2, "Status not updated to completed");
+				done();
+			})
+			.catch(function(err) {
+				done(err);
+			})
+	}));
+
+	it("should add withdrawable funds for league winner ", redeploy(accounts[0], function(done, leagueAgg){
+		completeLeague(leagueAgg)
+			.then(function() {
+				return leagueAgg.getAvailableFunds.call({from: accounts[1]});
+			})
+			.then(function(availableFunds) {
+				assert.equal(availableFunds, 2000000, "League winner funds not correct");
+				done();
+			})
+			.catch(function(err) {
+				done(err);
+			})
+	}));
+
+	it("should not add withdrawable funds for league loser", redeploy(accounts[0], function(done, leagueAgg){
+		completeLeague(leagueAgg)
+			.then(function() {
+				return leagueAgg.getAvailableFunds.call({from: accounts[2]});
+			})
+			.then(function(availableFunds) {
+				assert.equal(availableFunds, 0, "League loser funds not correct");
+				done();
+			})
+			.catch(function(err) {
+				done(err);
+			})
+	}));
   
   it("should be able to retrieve a leagues details", redeploy(accounts[0], function(done, leagueAgg){
     addLeague(leagueAgg).then(function() {
@@ -261,7 +328,13 @@ contract('LeagueAggregate', function(accounts) {
   }));
 
 	function addLeague(leagueAgg) {
-		return leagueAgg.addLeague(fromAscii("Test League", 32), 3, 1, 1000000, 2, 2, {from: accounts[0], gas: 3000000});
+		return leagueAgg.addLeague(fromAscii("Test League", 32), 3, 1, 1000000, 2, 2, {from: accounts[0], gas: 3000000})
+			.then(function() {
+				return leagueAgg.getLeaguesForAdmin.call(accounts[0])
+			})
+			.then(function(leagueIds) {
+				return leagueIds[0];
+			})
 	};
 
 	function addAndFillLeague(leagueAgg) {
@@ -282,6 +355,24 @@ contract('LeagueAggregate', function(accounts) {
 					})
 					.then(function(leagueDetails) {
 						return {id: leagueIds[0], data: leagueDetails};
+					});
+			});
+	};
+
+	function completeLeague(leagueAgg) {
+		return addAndFillLeague(leagueAgg)
+			.then(function(leagueDetails) {
+				//Participant ids
+				var partIds = leagueDetails.data[1];
+				return leagueAgg.addResult(leagueDetails.id, partIds[0], 5, partIds[1], 1, {from: accounts[3], gas: 3000000})
+					.then(function() {
+						return leagueAgg.addResult(leagueDetails.id, partIds[1], 2, partIds[0], 2, {from: accounts[3], gas: 3000000})
+					})
+					.then(function() {
+						return leagueAgg.getLeagueDetails.call(leagueDetails.id)
+					})
+					.then(function(leagueDetails) {
+						return {id: leagueDetails.id, data: leagueDetails};
 					});
 			});
 	};

@@ -17,6 +17,7 @@ contract LeagueAggregate is LeagueAggregateI {
         address[] referees;
         Participant[] participants;
         mapping (uint => uint16) scores;
+        uint8 resultCount;
     }
 
     struct Participant {
@@ -151,6 +152,13 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
             leagues[leagueId].scores[homeParticipantId] += leagues[leagueId].pointsForDraw;
             leagues[leagueId].scores[awayParticipantId] += leagues[leagueId].pointsForDraw;
         }
+
+        leagues[leagueId].resultCount++;
+
+        //Have all results been received?
+        if (leagues[leagueId].resultCount == leagues[leagueId].numOfEntrants * leagues[leagueId].timesToPlayEachParticipant - 2) {
+            completeLeague(leagueId);
+        }
     }
 
     function getLeaguesForAdmin(address adminAddress) constant returns (uint[]) {
@@ -199,6 +207,32 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
 
     function getAvailableFunds() constant returns (uint) {
         return availableFunds[msg.sender];
+    }
+
+    function completeLeague(uint leagueId) private {
+        leagues[leagueId].status = LeagueStatus.COMPLETED;
+
+        //For now, winner takes all, but this could change (and the contract should take a cut also)
+        //Need to cope with multiple top scores
+        availableFunds[getHighestScoreAddress(leagueId)] += leagues[leagueId].entryFee * leagues[leagueId].numOfEntrants;
+    }
+
+    //TODO Cope with multiple top scores
+    function getHighestScoreAddress(uint leagueId) private returns (address){
+        League league = leagues[leagueId];
+
+        address highestAddress;
+        uint16 highestScore;
+        for (uint i = 0; i < league.participants.length; i++) {
+            Participant participant = league.participants[i];
+            if (league.scores[participant.id] > highestScore) {
+                highestAddress = participant.adminAddress;
+            }
+
+            highestScore = league.scores[participant.id];
+        }
+
+        return highestAddress;
     }
 
     function updateLeagueStatus(uint leagueId, LeagueStatus leagueStatus) private {
