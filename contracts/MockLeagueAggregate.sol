@@ -1,5 +1,5 @@
-pragma solidity ^0.4.2;
-import "LeagueAggregateI.sol";
+pragma solidity ^0.4.11;
+import "./LeagueAggregateI.sol";
 
 contract MockLeagueAggregate is LeagueAggregateI {
 

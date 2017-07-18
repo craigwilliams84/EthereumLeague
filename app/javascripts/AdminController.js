@@ -8,17 +8,16 @@ angular.module('etherLeagueApp').controller('adminCtrl', ['$scope', '$routeParam
 
   $scope.addLeague = function(name, pointsForWin, pointsForDraw, entryFee, numOfEntrants, timesToPlay) {
     $scope.$parent.showInfoMessage("League creation transaction sent....");
-    leagueAggregateService.addLeague(name, pointsForWin, pointsForDraw, entryFee, numOfEntrants, timesToPlay, function(err) {
-
-      if (err) {
-        console.error(err);
-        $scope.$parent.showErrorMessage("There was an error when creating the league");
-      } else {
+    leagueAggregateService.addLeague(name, pointsForWin, pointsForDraw, entryFee, numOfEntrants, timesToPlay)
+      .then(function() {
         console.log("League created successfully");
         $scope.$parent.showSuccessMessage("League created successfully");
         $scope.refreshAll();
-      }
-    });
+      })
+      .catch(function(err) {
+        console.error(err);
+        $scope.$parent.showErrorMessage("There was an error when creating the league");
+      });
   };
 
   var init = function() {

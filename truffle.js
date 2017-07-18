@@ -1,5 +1,7 @@
+var DefaultBuilder = require("truffle-default-builder");
+
 module.exports = {
-  build: {
+  build: new DefaultBuilder({
     "index.html": "index.html",
     "league.html": "league.html",
     "myLeagues.html": "myLeagues.html",
@@ -39,9 +41,12 @@ module.exports = {
       "javascripts/_vendor/hooked-web3-provider.js",  
       "javascripts/etherLeagueController.js"
     ]
-  },
-  rpc: {
-    host: "localhost",
-    port: 8545
+  }),
+  networks: {
+    development: {
+      host: "localhost",
+      port: 8545,
+      network_id: "*"
+    }
   }
 };

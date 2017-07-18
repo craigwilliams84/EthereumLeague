@@ -1,16 +1,23 @@
+var LeagueAggregate = artifacts.require("LeagueAggregate.sol");
+
 contract('LeagueAggregate', function(accounts) {
   
   it("should be able to add a new league", function(done){
-    leagueAgg = LeagueAggregate.deployed();    
-    	
-    addLeague(leagueAgg).then(function() {
-    	return leagueAgg.getLeaguesForAdmin.call(accounts[0]).then(function(leagueIds) {
-    		assert.equal(leagueIds.length, 1, "League not added correctly");		
-    		done();
-    	});
-    }).catch(function(err) {
-    	done(err);
-  	});
+    LeagueAggregate.deployed()
+			.then(function(deployed) {
+				leagueAgg = deployed
+				return addLeague(leagueAgg);
+			})
+			.then(function() {
+				return leagueAgg.getLeaguesForAdmin.call(accounts[0]);
+			})
+			.then(function(leagueIds) {
+				assert.equal(leagueIds.length, 1, "League not added correctly");
+				done();
+			})
+			.catch(function(err) {
+				done(err);
+			});
   });
   
   it("should be able to add a referee to a league", redeploy(accounts[0], function(done, leagueAgg){    	

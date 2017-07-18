@@ -20,15 +20,15 @@ angular.module('etherLeagueApp').controller('joinLeagueCtrl', ['$scope', '$route
 
   $scope.joinLeague = function(teamName) {
     $scope.$parent.showInfoMessage("Join league transaction sent....");
-    leagueAggregateService.joinLeague($scope.leagues[0], teamName, function(err) {
-      if (err) {
-        console.error(err);
-        $scope.$parent.showErrorMessage("An error occurred when attempting to join the league");
-      } else {
+    leagueAggregateService.joinLeague($scope.leagues[0], teamName)
+      .then(function() {
         console.log("League joined successfully");
         $scope.$parent.showSuccessMessage("League joined successfully");
-      }
-    });
-  }
+      })
+      .catch(function(err) {
+        console.error(err);
+        $scope.$parent.showErrorMessage("An error occurred when attempting to join the league");
+      })
+  };
 
 }]);

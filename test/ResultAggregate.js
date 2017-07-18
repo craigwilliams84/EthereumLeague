@@ -1,3 +1,6 @@
+var ResultAggregate = artifacts.require("ResultAggregate.sol");
+var MockLeagueAggregate = artifacts.require("MockLeagueAggregate.sol");
+
 contract('ResultAggregate', function(accounts) {
 
   it("should be able to add a new result", mockRedeploy(true, true, function(done, resultAgg){

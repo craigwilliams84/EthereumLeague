@@ -3,39 +3,35 @@ const REFEREE = "Referee";
 const PARTICIPANT= "Participant";
 
 angular.module('EtherLeagueServices').service('leagueAggregateService', ['accountsService', 'leagueCacheService', function(accountsService, leagueCacheService) {
-  this.addLeague = function(name, pointsForWin, pointsForDraw, entryFee, numOfEntrants, timesToPlay, callback) {
-    var leagueAgg = LeagueAggregate.deployed();
 
-    leagueAgg.addLeague(fromAscii(name), pointsForWin, pointsForDraw, entryFee, numOfEntrants, timesToPlay, {
-      from: accountsService.getMainAccount(),
-      gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
-    }).then(function() {
-      callback();
-    }).catch(function(e) {
-      callback(e);
-    });
+  this.addLeague = function(name, pointsForWin, pointsForDraw, entryFee, numOfEntrants, timesToPlay) {
+    return getLeagueAggregate()
+      .then(function(leagueAgg) {
+        return leagueAgg.addLeague(fromAscii(name), pointsForWin, pointsForDraw, entryFee, numOfEntrants, timesToPlay, {
+          from: accountsService.getMainAccount(),
+          gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
+        });
+      });
   };
 
-  this.joinLeague = function(leagueDetails, teamName, callback) {
-    var leagueAgg = LeagueAggregate.deployed();
-
-    leagueAgg.joinLeague(leagueDetails.id, fromAscii(teamName), {
-      from: accountsService.getMainAccount(), value: leagueDetails.entryFee,
-      gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
-    }).then(function() {
-      callback();
-    }).catch(function(e) {
-      callback(e);
-    });
+  this.joinLeague = function(leagueDetails, teamName) {
+    return getLeagueAggregate()
+      .then(function(leagueAgg) {
+        return leagueAgg.joinLeague(leagueDetails.id, fromAscii(teamName), {
+          from: accountsService.getMainAccount(), value: leagueDetails.entryFee,
+          gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
+        });
+      })
   };
 
   this.addReferee = function(leagueId, refereeAddress) {
-    var leagueAgg = LeagueAggregate.deployed();
-
-    return leagueAgg.addRefereeToLeague(leagueId, refereeAddress, {
-      from: accountsService.getMainAccount(),
-      gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
-    });
+    return getLeagueAggregate()
+      .then(function(leagueAgg) {
+        return leagueAgg.addRefereeToLeague(leagueId, refereeAddress, {
+          from: accountsService.getMainAccount(),
+          gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
+        });
+      })
   };
 
   this.getMyLeagues = function() {
@@ -60,41 +56,49 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
   };
 
   this.getAdminLeagueIds = function() {
-    return new Promise(function(resolve, reject) {
-      var leagueAgg = LeagueAggregate.deployed();
-      return leagueAgg.getLeaguesForAdmin.call("0x" + accountsService.getMainAccount(), {from: accountsService.getMainAccount()})
-        .then(function(leagueIds) {
-          console.log("League ids length: " + leagueIds.length);
-          //resolve(createIdsAndRoles(leagueIds, ADMIN));
-          resolve(leagueIds);
-      }).catch(function(err) {
-        reject(err);
+    return getLeagueAggregate()
+      .then(function(leagueAgg) {
+        return leagueAgg.getLeaguesForAdmin.call("0x" + accountsService.getMainAccount(), {from: accountsService.getMainAccount()})
+      })
+      .then(function(leagueIds) {
+        console.log("League ids length: " + leagueIds.length);
+        //resolve(createIdsAndRoles(leagueIds, ADMIN));
+        return leagueIds;
       });
-    });
   };
 
   this.getParticipantLeagueIds = function() {
     return new Promise(function(resolve, reject) {
-      var leagueAgg = LeagueAggregate.deployed();
+      return getLeagueAggregate()
+        .then(function(leagueAgg) {
+          var onLeagueJoinedEvent = leagueAgg.OnLeagueJoined({participantAddress: "0x" + accountsService.getMainAccount()},
+            {fromBlock: 0, toBlock: web3.eth.getBlockNumber()});
 
-      var onLeagueJoinedEvent = leagueAgg.OnLeagueJoined({participantAddress: "0x" + accountsService.getMainAccount()},
-        {fromBlock: 0, toBlock: web3.eth.getBlockNumber()});
+          onLeagueJoinedEvent.get(function(err, logs) {
+            if (err) {
+              reject(err);
+            } else {
+              var leagueIds = new Set();
 
-      onLeagueJoinedEvent.get(function(err, logs) {
-        if (err) {
-          reject(err);
-        } else {
-          var leagueIds = new Set();
+              logs.forEach(function(log) {
+                //Convert to string as Set doesn't seem to be able to figure out when 2 BigInteger values are equal
+                leagueIds.add(log.args.leagueId.toString());
+              });
 
-          logs.forEach(function(log) {
-            //Convert to string as Set doesn't seem to be able to figure out when 2 BigInteger values are equal
-            leagueIds.add(log.args.leagueId.toString());
+              resolve([...leagueIds.values()]);
+            }
           });
-
-          resolve([...leagueIds.values()]);
-        }
-      });
+        });
     });
+  };
+
+  this.getParticipantIdsInLeagueForUser = function(leagueId) {
+    return getLeagueAggregate()
+      .then(function(leagueAgg) {
+        return leagueAgg.OnLeagueJoined({leagueId: leagueId, participantAddress: "0x" + accountsService.getMainAccount()},
+                                        {fromBlock: 0, toBlock: web3.eth.getBlockNumber()});
+      })
+      .then(getIdsFromEvent(event, "participantId"));
   };
 
   this.getParticipantIdsInLeagueForUser = function(leagueId) {
@@ -121,25 +125,42 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
     });
   };
 
+  this.getParticipantLeagueIds = function() {
+    return getLeagueAggregate()
+      .then(function(leagueAgg) {
+        return leagueAgg.OnLeagueJoined({participantAddress: "0x" + accountsService.getMainAccount()},
+                                        {fromBlock: 0, toBlock: web3.eth.getBlockNumber()});
+      })
+      .then(getLeagueIdsFromEvent);
+  };
+
   this.getRefereeLeagueIds = function() {
+    return getLeagueAggregate()
+      .then(function(leagueAgg) {
+        return leagueAgg.OnRefereeAdded({refereeAddress: "0x" + accountsService.getMainAccount()},
+                                        {fromBlock: 0, toBlock: web3.eth.getBlockNumber()});
+      })
+      .then(getLeagueIdsFromEvent);
+  };
+
+  var getLeagueIdsFromEvent = function(event) {
+    return getIdsFromEvent(event, "leagueId");
+  };
+
+  var getIdsFromEvent = function(event, idKey) {
     return new Promise(function(resolve, reject) {
-      var leagueAgg = LeagueAggregate.deployed();
-
-      var onRefereeAddedEvent = leagueAgg.OnRefereeAdded({refereeAddress: "0x" + accountsService.getMainAccount()},
-        {fromBlock: 0, toBlock: web3.eth.getBlockNumber()});
-
-      onRefereeAddedEvent.get(function(err, logs) {
+      event.get(function(err, logs) {
         if (err) {
           reject(err);
         } else {
-          var leagueIds = new Set();
+          var ids = new Set();
 
           logs.forEach(function(log) {
             //Convert to string as Set doesn't seem to be able to figure out when 2 BigInteger values are equal
-            leagueIds.add(log.args.leagueId.toString());
+            ids.add(log.args[idKey].toString());
           });
 
-          resolve([...leagueIds.values()]);
+          resolve([...ids.values()]);
         }
       });
     });
@@ -187,26 +208,25 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
         }
       }
 
-      var leagueAgg = LeagueAggregate.deployed();
+      return getLeagueAggregate()
+        .then(function(leagueAgg) {
+          return leagueAgg.getLeagueDetails.call(id).then(function(leagueDetails) {
+            var leagueDetails = {
+              'id': id.toString(),
+              name: toAscii(leagueDetails[0]),
+              participantIds: leagueDetails[1],
+              participantNames: toAsciiArray(leagueDetails[2]),
+              participantScores: leagueDetails[3],
+              entryFee: leagueDetails[4],
+              status: getStatus(leagueDetails[5]),
+              userRoles: userRoles
+            };
 
-      return leagueAgg.getLeagueDetails.call(id).then(function(leagueDetails) {
-        var leagueDetails = {
-          'id': id.toString(),
-          name: toAscii(leagueDetails[0]),
-          participantIds: leagueDetails[1],
-          participantNames: toAsciiArray(leagueDetails[2]),
-          participantScores: leagueDetails[3],
-          entryFee: leagueDetails[4],
-          status: getStatus(leagueDetails[5]),
-          userRoles: userRoles
-        };
-
-        addSortedEntriesToLeagueDetails(leagueDetails);
-        leagueCacheService.put(id, leagueDetails);
-        resolve(leagueDetails);
-      }).catch(function(err) {
-        reject(err);
-      });
+            addSortedEntriesToLeagueDetails(leagueDetails);
+            leagueCacheService.put(id, leagueDetails);
+            resolve(leagueDetails);
+          });
+        })
     });
   };
 
@@ -228,32 +248,6 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
     });
   };
 
-  var loadLeagues = function(leagueIdFunction, leagueList, finishedCallback) {
-    leagueIdFunction(function(err, leagueIds) {
-      if (err) {
-        console.error(err);
-        if (finishedCallback) {
-          finishedCallback(err);
-        }
-      } else {
-        var retrievedCount = 0;
-        leagueIds.forEach(function(id) {
-          leagueAggregateService.getLeagueDetails(id, function(err, leagueDetails) {
-            $timeout(function() {
-              addSortedEntriesToLeagueDetails(leagueDetails);
-              leagueList.push(leagueDetails);
-              retrievedCount++;
-
-              if (finishedCallback && retrievedCount == leagueIds.length) {
-                finishedCallback();
-              }
-            });
-          });
-        });
-      }
-    });
-  };
-
   var addSortedEntriesToLeagueDetails = function(leagueDetails) {
     leagueDetails.entries = [];
     for (var i = 0; i < leagueDetails.participantIds.length; i++) {
@@ -271,6 +265,10 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
   var createLeagueEntry = function(id, name, score) {
     return {'id': id, 'name': name, 'score': score};
   };
+
+  var getLeagueAggregate = function() {
+    return LeagueAggregate.deployed();
+  }
   
   var getStatus = function(statusCode) {
     if (statusCode == 0) {

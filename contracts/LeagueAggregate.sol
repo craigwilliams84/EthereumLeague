@@ -1,6 +1,6 @@
-pragma solidity ^0.4.2;
+pragma solidity ^0.4.11;
 
-import "LeagueAggregateI.sol";
+import "./LeagueAggregateI.sol";
 
 contract LeagueAggregate is LeagueAggregateI {
 
@@ -72,12 +72,12 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
             //Check the entry fee is correct
             if (msg.value < leagues[leagueId].entryFee) {
                 //Too low, add funds to be withdrawn
-                availableFunds[msg.sender] =+ msg.value;
+                availableFunds[msg.sender] = availableFunds[msg.sender] + msg.value;
             } else {
 
                 if (msg.value > leagues[leagueId].entryFee) {
                     //Too high, add remainder to available funds to withdraw
-                    availableFunds[msg.sender] =+ msg.value - leagues[leagueId].entryFee;
+                    availableFunds[msg.sender] = availableFunds[msg.sender] + (msg.value - leagues[leagueId].entryFee);
                 }
 
                 uint index = leagues[leagueId].participants.length;
@@ -143,14 +143,14 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
 
         if (homeParticipantScore > awayParticipantScore) {
             //Home win
-            leagues[leagueId].scores[homeParticipantId] =+ leagues[leagueId].pointsForWin;
+            leagues[leagueId].scores[homeParticipantId] = leagues[leagueId].scores[homeParticipantId] + leagues[leagueId].pointsForWin;
         } else if (homeParticipantScore < awayParticipantScore) {
             //Away win
-            leagues[leagueId].scores[awayParticipantId] =+ leagues[leagueId].pointsForWin;
+            leagues[leagueId].scores[awayParticipantId] = leagues[leagueId].scores[awayParticipantId] + leagues[leagueId].pointsForWin;
         } else {
             //Draw
-            leagues[leagueId].scores[homeParticipantId] += leagues[leagueId].pointsForDraw;
-            leagues[leagueId].scores[awayParticipantId] += leagues[leagueId].pointsForDraw;
+            leagues[leagueId].scores[homeParticipantId] = leagues[leagueId].scores[homeParticipantId] + leagues[leagueId].pointsForDraw;
+            leagues[leagueId].scores[awayParticipantId] = leagues[leagueId].scores[awayParticipantId] + leagues[leagueId].pointsForDraw;
         }
 
         leagues[leagueId].resultCount++;

@@ -1,6 +1,6 @@
-pragma solidity ^0.4.2;
+pragma solidity ^0.4.11;
 
-import "LeagueAggregateI.sol";
+import "./LeagueAggregateI.sol";
 
 contract ResultAggregate {
     address owner;
