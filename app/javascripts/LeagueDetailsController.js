@@ -36,9 +36,10 @@ angular.module('etherLeagueApp').controller('leagueDetailsCtrl', ['$scope', '$ro
         console.log("Result added successfully");
         $scope.$parent.showSuccessMessage("Result added successfully");
         $scope.refreshAll();
-      }).catch(function(e) {
-      console.error(e);
-      $scope.$parent.showErrorMessage("There was an error when adding the result");
+      })
+      .catch(function(e) {
+        console.error(e);
+        $scope.$parent.showErrorMessage("There was an error when adding the result");
     });
   };
 

@@ -43,7 +43,7 @@ angular.module('EtherLeagueServices').service('resultAggregateService', ['accoun
   var getPendingResultIds = function(leagueId) {
     return getResultAggregate()
       .then(function(resultAgg) {
-        resultAgg.getPendingResultIds(leagueId, {from: accountsService.getMainAccount()});
+        return resultAgg.getPendingResultIds(leagueId, {from: accountsService.getMainAccount()});
       });
   };
 

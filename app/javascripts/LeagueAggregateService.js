@@ -1,6 +1,7 @@
 const ADMIN = "Admin";
 const REFEREE = "Referee";
 const PARTICIPANT= "Participant";
+const STATUSES={0: "AWAITING PARTICIPANTS", 1: "IN PROGRESS", 2: "COMPLETED"};
 
 angular.module('EtherLeagueServices').service('leagueAggregateService', ['accountsService', 'leagueCacheService', function(accountsService, leagueCacheService) {
 
@@ -67,62 +68,15 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
       });
   };
 
-  this.getParticipantLeagueIds = function() {
-    return new Promise(function(resolve, reject) {
-      return getLeagueAggregate()
-        .then(function(leagueAgg) {
-          var onLeagueJoinedEvent = leagueAgg.OnLeagueJoined({participantAddress: "0x" + accountsService.getMainAccount()},
-            {fromBlock: 0, toBlock: web3.eth.getBlockNumber()});
-
-          onLeagueJoinedEvent.get(function(err, logs) {
-            if (err) {
-              reject(err);
-            } else {
-              var leagueIds = new Set();
-
-              logs.forEach(function(log) {
-                //Convert to string as Set doesn't seem to be able to figure out when 2 BigInteger values are equal
-                leagueIds.add(log.args.leagueId.toString());
-              });
-
-              resolve([...leagueIds.values()]);
-            }
-          });
-        });
-    });
-  };
-
   this.getParticipantIdsInLeagueForUser = function(leagueId) {
     return getLeagueAggregate()
       .then(function(leagueAgg) {
         return leagueAgg.OnLeagueJoined({leagueId: leagueId, participantAddress: "0x" + accountsService.getMainAccount()},
                                         {fromBlock: 0, toBlock: web3.eth.getBlockNumber()});
       })
-      .then(getIdsFromEvent(event, "participantId"));
-  };
-
-  this.getParticipantIdsInLeagueForUser = function(leagueId) {
-    return new Promise(function(resolve, reject) {
-      var leagueAgg = LeagueAggregate.deployed();
-
-      var onLeagueJoinedEvent = leagueAgg.OnLeagueJoined({leagueId: leagueId, participantAddress: "0x" + accountsService.getMainAccount()},
-        {fromBlock: 0, toBlock: web3.eth.getBlockNumber()});
-
-      onLeagueJoinedEvent.get(function(err, logs) {
-        if (err) {
-          reject(err);
-        } else {
-          var participantIds = new Set();
-
-          logs.forEach(function(log) {
-            //Convert to string as Set doesn't seem to be able to figure out when 2 BigInteger values are equal
-            participantIds.add(log.args.participantId.toString());
-          });
-
-          resolve([...participantIds.values()]);
-        }
+      .then(function(event) {
+        return getIdsFromEvent(event, "participantId")
       });
-    });
   };
 
   this.getParticipantLeagueIds = function() {
@@ -271,11 +225,7 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
   }
   
   var getStatus = function(statusCode) {
-    if (statusCode == 0) {
-      return "AWAITING PARTICIPANTS";
-    } else if (statusCode == 1) {
-      return "IN PROGRESS";
-    }
+    return STATUSES[statusCode];
   }
 
   var toAsciiArray = function(bytesArray) {
