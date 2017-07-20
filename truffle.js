@@ -8,6 +8,7 @@ module.exports = {
     "admin.html": "admin.html",
     "join.html": "join.html",
     "leagueDetails.html": "leagueDetails.html",
+    "bank.html": "bank.html",
     "css/bootstrap.css": "css/bootstrap.css",
     "css/etherLeague.css": "css/etherLeague.css",
     "app.js": [
@@ -28,7 +29,8 @@ module.exports = {
       "javascripts/MyLeaguesController.js",
       "javascripts/AdminController.js",
       "javascripts/JoinLeagueController.js",
-      "javascripts/LeagueDetailsController.js"
+      "javascripts/LeagueDetailsController.js",
+      "javascripts/BankController.js"
     ],
     "etherLeagueServices.js" :[
       "javascripts/AccountsService.js",

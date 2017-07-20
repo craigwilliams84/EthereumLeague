@@ -14,7 +14,10 @@ app.config(['$routeProvider', '$locationProvider', function($routeProvider, $loc
     }).when('/leagueDetails/:leagueId', {
       templateUrl: 'leagueDetails.html',
       controller: 'leagueDetailsCtrl'
-    }).otherwise({redirectTo: '/myLeagues/'});
+    }).when('/bank/', {
+    templateUrl: 'bank.html',
+    controller: 'bankCtrl'
+  }).otherwise({redirectTo: '/myLeagues/'});
   $locationProvider.html5Mode(false);
 }]);
 

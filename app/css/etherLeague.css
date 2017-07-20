@@ -5,3 +5,13 @@
 .actionsFirstInput {
     padding-left: 0px;
 }
+
+.no-data {
+    margin-top: 30px;
+    margin-left: 10px;
+    margin-right: 10px;
+    font-size: 22px;
+    color: #c4c4c4;
+    text-align: center;
+    font-weight: bold;
+}

@@ -288,6 +288,40 @@ contract('LeagueAggregate', function(accounts) {
 				done(err);
 			})
 	}));
+
+	it("should allow league winner to withdraw funds ", redeploy(accounts[0], function(done, leagueAgg){
+		completeLeague(leagueAgg)
+			.then(function() {
+				var fundsBefore= web3.eth.getBalance(accounts[1]);
+				return leagueAgg.withdrawFunds({from: accounts[1], gas: 3000000, gasPrice: 1})
+					.then(function(result) {
+						var fundsAfter= web3.eth.getBalance(accounts[1]);
+						var gasUsed = result.receipt.gasUsed;
+						assert.equal(fundsAfter.toString(), fundsBefore.plus(2000000 - gasUsed).toString(), "League winner funds transferred correctly");
+						done();
+					});
+			})
+			.catch(function(err) {
+				done(err);
+			});
+	}));
+
+	it("should empty available funds after withdrawal ", redeploy(accounts[0], function(done, leagueAgg){
+		completeLeague(leagueAgg)
+			.then(function() {
+				return leagueAgg.withdrawFunds({from: accounts[1], gas: 3000000, gasPrice: 1})
+			})
+			.then(function() {
+				return leagueAgg.getAvailableFunds.call({from: accounts[1]});
+			})
+			.then(function(availableFunds) {
+				assert.equal(availableFunds, 0, "League winner funds not emptied after withdrawal");
+				done();
+			})
+			.catch(function(err) {
+				done(err);
+			});
+	}));
   
   it("should be able to retrieve a leagues details", redeploy(accounts[0], function(done, leagueAgg){
     addLeague(leagueAgg).then(function() {

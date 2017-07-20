@@ -5,10 +5,11 @@ const STATUSES={0: "AWAITING PARTICIPANTS", 1: "IN PROGRESS", 2: "COMPLETED"};
 
 angular.module('EtherLeagueServices').service('leagueAggregateService', ['accountsService', 'leagueCacheService', function(accountsService, leagueCacheService) {
 
-  this.addLeague = function(name, pointsForWin, pointsForDraw, entryFee, numOfEntrants, timesToPlay) {
+  this.addLeague = function(name, pointsForWin, pointsForDraw, entryFeeEther, numOfEntrants, timesToPlay) {
     return getLeagueAggregate()
       .then(function(leagueAgg) {
-        return leagueAgg.addLeague(fromAscii(name), pointsForWin, pointsForDraw, entryFee, numOfEntrants, timesToPlay, {
+        return leagueAgg.addLeague(fromAscii(name), pointsForWin,
+          pointsForDraw, web3.toWei(entryFeeEther, "ether"), numOfEntrants, timesToPlay, {
           from: accountsService.getMainAccount(),
           gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
         });
@@ -29,6 +30,16 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
     return getLeagueAggregate()
       .then(function(leagueAgg) {
         return leagueAgg.addRefereeToLeague(leagueId, refereeAddress, {
+          from: accountsService.getMainAccount(),
+          gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
+        });
+      })
+  };
+
+  this.withdrawFunds = function() {
+    return getLeagueAggregate()
+      .then(function(leagueAgg) {
+        return leagueAgg.withdrawFunds({
           from: accountsService.getMainAccount(),
           gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
         });
@@ -95,6 +106,13 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
                                         {fromBlock: 0, toBlock: web3.eth.getBlockNumber()});
       })
       .then(getLeagueIdsFromEvent);
+  };
+
+  this.getAvailableFunds = function() {
+    return getLeagueAggregate()
+      .then(function(leagueAgg) {
+        return leagueAgg.getAvailableFunds.call({from: accountsService.getMainAccount()});
+      });
   };
 
   var getLeagueIdsFromEvent = function(event) {
@@ -172,6 +190,7 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
               participantNames: toAsciiArray(leagueDetails[2]),
               participantScores: leagueDetails[3],
               entryFee: leagueDetails[4],
+              entryFeeForDisplay: web3.fromWei(leagueDetails[4], "ether").toString(),
               status: getStatus(leagueDetails[5]),
               userRoles: userRoles
             };

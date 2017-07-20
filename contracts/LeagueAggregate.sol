@@ -209,6 +209,14 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
         return availableFunds[msg.sender];
     }
 
+    function withdrawFunds() {
+        uint amount = availableFunds[msg.sender];
+
+        //Stop reentrant attack
+        availableFunds[msg.sender] = 0;
+        msg.sender.transfer(amount);
+    }
+
     function completeLeague(uint leagueId) private {
         leagues[leagueId].status = LeagueStatus.COMPLETED;
 

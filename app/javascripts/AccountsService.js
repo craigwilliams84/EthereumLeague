@@ -8,7 +8,8 @@ angular.module('EtherLeagueServices', []).service('accountsService', ['$window',
   this.getBalance = function(callback) {
 
     web3.eth.getBalance(accounts[0], function(error, result) {
-      callback(error, result);
+
+      callback(error, web3.fromWei(result,"ether"));
     });
   };
 
