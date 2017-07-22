@@ -1,14 +1,18 @@
+contract = require("truffle-contract");
+leagueAggregateContract = require("../../build/contracts/LeagueAggregate.json");
+LeagueAggregate = contract(leagueAggregateContract);
+
 const ADMIN = "Admin";
 const REFEREE = "Referee";
 const PARTICIPANT= "Participant";
 const STATUSES={0: "AWAITING PARTICIPANTS", 1: "IN PROGRESS", 2: "COMPLETED"};
 
-angular.module('EtherLeagueServices').service('leagueAggregateService', ['accountsService', 'leagueCacheService', function(accountsService, leagueCacheService) {
+require('angular').module('EtherLeagueServices').service('leagueAggregateService', ['accountsService', 'leagueCacheService', function(accountsService, leagueCacheService) {
 
   this.addLeague = function(name, pointsForWin, pointsForDraw, entryFeeEther, numOfEntrants, timesToPlay) {
     return getLeagueAggregate()
       .then(function(leagueAgg) {
-        return leagueAgg.addLeague(fromAscii(name), pointsForWin,
+        return leagueAgg.addLeague(web3.fromAscii(name), pointsForWin,
           pointsForDraw, web3.toWei(entryFeeEther, "ether"), numOfEntrants, timesToPlay, {
           from: accountsService.getMainAccount(),
           gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
@@ -19,7 +23,7 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
   this.joinLeague = function(leagueDetails, teamName) {
     return getLeagueAggregate()
       .then(function(leagueAgg) {
-        return leagueAgg.joinLeague(leagueDetails.id, fromAscii(teamName), {
+        return leagueAgg.joinLeague(leagueDetails.id, web3.fromAscii(teamName), {
           from: accountsService.getMainAccount(), value: leagueDetails.entryFee,
           gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
         });
@@ -182,10 +186,10 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
 
       return getLeagueAggregate()
         .then(function(leagueAgg) {
-          return leagueAgg.getLeagueDetails.call(id).then(function(leagueDetails) {
+          return leagueAgg.getLeagueDetails.call(id.valueOf()).then(function(leagueDetails) {
             var leagueDetails = {
               'id': id.toString(),
-              name: toAscii(leagueDetails[0]),
+              name: web3.toAscii(leagueDetails[0]),
               participantIds: leagueDetails[1],
               participantNames: toAsciiArray(leagueDetails[2]),
               participantScores: leagueDetails[3],
@@ -249,7 +253,7 @@ angular.module('EtherLeagueServices').service('leagueAggregateService', ['accoun
 
   var toAsciiArray = function(bytesArray) {
     return bytesArray.map(function(bytesValue) {
-      return toAscii(bytesValue);
+      return web3.toAscii(bytesValue);
     });
   }
 

@@ -1,4 +1,4 @@
-angular.module('etherLeagueApp').controller('bankCtrl', ['$scope', '$routeParams', '$timeout', 'leagueAggregateService', function($scope, $routeParams, $timeout, leagueAggregateService) {
+require('angular').module('etherLeagueApp').controller('bankCtrl', ['$scope', '$routeParams', '$timeout', 'leagueAggregateService', function($scope, $routeParams, $timeout, leagueAggregateService) {
 
   $scope.availableFunds = 0;
 

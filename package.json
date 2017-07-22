@@ -1,0 +1,45 @@
+{
+  "name": "ethereum-league",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test": "jasmine-node spec"
+  },
+  "dependencies": {
+    "angular": "^1.6.5",
+    "angular-ui-bootstrap": "^2.5.0",
+    "angular-route": "^1.6.5",
+    "angular-sanitize": "^1.6.5",
+    "bootstrap": "^3.3.7",
+    "eth-lightwallet": "^2.5.6",
+    "hooked-web3-provider": "^1.0.0",
+    "truffle-contract": "^2.0.2",
+    "web3": "^0.20.0"
+  },
+  "repository": {},
+  "engines": {
+    "node": "4.x"
+  },
+  "devDependencies": {
+    "browserify": "^14.4.0",
+    "browserify-ngannotate": "^0.7.1",
+    "chai": "^3.5.0",
+    "del": "^1.1.1",
+    "gulp": "^3.9.1",
+    "gulp-cachebust": "0.0.5",
+    "gulp-concat": "^2.5.2",
+    "gulp-install": "^0.4.0",
+    "gulp-jshint": "^1.10.0",
+    "gulp-ng-html2js": "^0.2.0",
+    "gulp-sourcemaps": "^1.5.1",
+    "gulp-uglify": "^1.1.0",
+    "gulp-util": "^3.0.4",
+    "gulp-webserver": "^0.9.0",
+    "jasmine": "^2.5.2",
+    "jasmine-node": "^1.14.5",
+    "run-sequence": "^2.0.0",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
+  }
+}

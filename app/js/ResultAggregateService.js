@@ -1,4 +1,8 @@
-angular.module('EtherLeagueServices').service('resultAggregateService', ['accountsService', 'leagueAggregateService', function(accountsService, leagueAggregateService) {
+contract = require("truffle-contract");
+resultAggregateContract = require("../../build/contracts/ResultAggregate.json");
+ResultAggregate = contract(resultAggregateContract);
+
+require('angular').module('EtherLeagueServices').service('resultAggregateService', ['accountsService', 'leagueAggregateService', function(accountsService, leagueAggregateService) {
 
   this.addResult = function(leagueId, homeParticipantId, homeScore, awayParticipantId, awayScore) {
     return getResultAggregate()
@@ -43,14 +47,14 @@ angular.module('EtherLeagueServices').service('resultAggregateService', ['accoun
   var getPendingResultIds = function(leagueId) {
     return getResultAggregate()
       .then(function(resultAgg) {
-        return resultAgg.getPendingResultIds(leagueId, {from: accountsService.getMainAccount()});
+        return resultAgg.getPendingResultIds(leagueId.valueOf(), {from: accountsService.getMainAccount()});
       });
   };
 
   var getResultDetails = function(leagueId, resultId) {
     return getResultAggregate()
       .then(function(resultAgg) {
-        return resultAgg.getResultDetails.call(leagueId, resultId);
+        return resultAgg.getResultDetails.call(leagueId, resultId.valueOf());
       })
       .then(function(resultDetails) {
         return {

@@ -1,4 +1,4 @@
-angular.module('etherLeagueApp').controller('leagueDetailsCtrl', ['$scope', '$routeParams', '$timeout', 'leagueAggregateService', 'resultAggregateService', 'accountsService', function($scope, $routeParams, $timeout, leagueAggregateService, resultAggregateService, accountsService) {
+require('angular').module('etherLeagueApp').controller('leagueDetailsCtrl', ['$scope', '$routeParams', '$timeout', 'leagueAggregateService', 'resultAggregateService', 'accountsService', function($scope, $routeParams, $timeout, leagueAggregateService, resultAggregateService, accountsService) {
   $scope.leagues = [];
   $scope.pendingResults = [];
 
@@ -62,13 +62,13 @@ angular.module('etherLeagueApp').controller('leagueDetailsCtrl', ['$scope', '$ro
 
   $scope.isAdmin = function() {
     if ($scope.getLeague()) {
-      return $scope.getLeague().userRoles.indexOf(ADMIN) > -1;
+      return $scope.getLeague().userRoles.indexOf("Admin") > -1;
     }
   };
 
   $scope.isReferee = function() {
     if ($scope.getLeague()) {
-      return $scope.getLeague().userRoles.indexOf(REFEREE) > -1;
+      return $scope.getLeague().userRoles.indexOf("Referee") > -1;
     }
   };
   

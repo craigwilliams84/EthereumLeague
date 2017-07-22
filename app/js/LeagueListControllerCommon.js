@@ -1,4 +1,4 @@
-angular.module('EtherLeagueServices').service('leagueListCtrlCommon', ['$timeout', 'leagueAggregateService', function($timeout, leagueAggregateService) {
+require('angular').module('EtherLeagueServices').service('leagueListCtrlCommon', ['$timeout', 'leagueAggregateService', function($timeout, leagueAggregateService) {
 
   this.loadLeagues = function(leagueIdFunction, leagueList, finishedCallback) {
     leagueIdFunction(function(err, leagueIds) {

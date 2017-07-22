@@ -1,27 +1,4 @@
-var app = angular.module('etherLeagueApp', ['ngRoute', 'EtherLeagueServices']);
-
-app.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
-  $routeProvider
-    .when('/myLeagues/', {
-      templateUrl: 'myLeagues.html',
-      controller: 'myLeaguesCtrl'
-    }).when('/admin/', {
-      templateUrl: 'admin.html',
-      controller: 'adminCtrl'
-    }).when('/join/', {
-      templateUrl: 'join.html',
-      controller: 'joinLeagueCtrl'
-    }).when('/leagueDetails/:leagueId', {
-      templateUrl: 'leagueDetails.html',
-      controller: 'leagueDetailsCtrl'
-    }).when('/bank/', {
-    templateUrl: 'bank.html',
-    controller: 'bankCtrl'
-  }).otherwise({redirectTo: '/myLeagues/'});
-  $locationProvider.html5Mode(false);
-}]);
-
-app.controller("etherLeagueController", ['$scope', '$window', '$timeout', 'leagueAggregateService', 'accountsService', function($scope, $window, $timeout, leagueAggregateService, accountsService) {
+require('angular').module('etherLeagueApp').controller("etherLeagueController", ['$scope', '$window', '$timeout', 'leagueAggregateService', 'accountsService', function($scope, $window, $timeout, leagueAggregateService, accountsService) {
 
   $scope.balance = "";
   $scope.infoMessage = "";

@@ -1,4 +1,4 @@
-angular.module('EtherLeagueServices', []).service('accountsService', ['$window', function($window) {
+require('angular').module('EtherLeagueServices', []).service('accountsService', ['$window', function($window) {
 
   var accounts = [];
   var account = "";

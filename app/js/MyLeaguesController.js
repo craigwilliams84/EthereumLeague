@@ -1,4 +1,4 @@
-angular.module('etherLeagueApp').controller('myLeaguesCtrl', ['$scope', '$routeParams', '$timeout', 'leagueAggregateService', 'leagueListCtrlCommon', function($scope, $routeParams, $timeout, leagueAggregateService, leagueListCtrlCommon) {
+require('angular').module('etherLeagueApp').controller('myLeaguesCtrl', ['$scope', '$routeParams', '$timeout', 'leagueAggregateService', 'leagueListCtrlCommon', function($scope, $routeParams, $timeout, leagueAggregateService, leagueListCtrlCommon) {
   $scope.leagues = [];
 
   $scope.refreshLeagues = function() {
