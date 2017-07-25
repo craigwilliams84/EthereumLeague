@@ -1,5 +1,5 @@
 # EthereumLeague
-A decentralized sports league management application built on top of the Ethereum blockchain.
+A decentralized sports / esports league management application built on top of the Ethereum blockchain.
 
 ## To run
 
