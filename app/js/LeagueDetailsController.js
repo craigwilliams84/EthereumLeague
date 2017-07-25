@@ -1,4 +1,5 @@
-require('angular').module('etherLeagueApp').controller('leagueDetailsCtrl', ['$scope', '$routeParams', '$timeout', 'leagueAggregateService', 'resultAggregateService', 'accountsService', function($scope, $routeParams, $timeout, leagueAggregateService, resultAggregateService, accountsService) {
+require('angular').module('etherLeagueApp').controller('leagueDetailsCtrl', ['$scope', '$routeParams', '$timeout', 'leagueAggregateService', 'resultAggregateService', 'accountsService', 'messagesService', 'modalService', function($scope, $routeParams, $timeout, leagueAggregateService, resultAggregateService, accountsService, messagesService, modalService) {
+  $scope.messagesService = messagesService;
   $scope.leagues = [];
   $scope.pendingResults = [];
 
@@ -14,45 +15,52 @@ require('angular').module('etherLeagueApp').controller('leagueDetailsCtrl', ['$s
 
   $scope.hasPendingResults = function() {
     return $scope.pendingResults.length > 0;
-  }
+  };
 
-  $scope.addReferee = function(refereeName, refereeAddress) {
-    $scope.$parent.showInfoMessage("Add referee transaction sent....");
-    leagueAggregateService.addReferee($scope.getLeague().id, "0x" + refereeAddress)
-      .then(function() {
-        console.log("Referee added successfully");
-        $scope.$parent.showSuccessMessage("Referee added successfully");
-        $scope.refreshAll();
-      }).catch(function(e) {
-        console.error(e);
-        $scope.$parent.showErrorMessage("There was an error when adding the referee");
-      });
+  $scope.showAddRefereeModal = function() {
+    var resolve = {
+      leagueId: function() {
+        return $scope.getLeague().id;
+      }
+    };
+
+    modalService.openModal("addRefereeModal", resolve);
+  };
+
+  $scope.showAddResultModal = function() {
+    var resolve = {
+      league: function() {
+        return $scope.getLeague();
+      }
+    };
+
+    modalService.openModal("addResultModal", resolve);
   };
 
   $scope.addResult = function(homeParticipantId, homeScore, awayParticipantId, awayScore) {
-    $scope.$parent.showInfoMessage("Add result transaction sent....");
+    messagesService.setInfoMessage("Add result transaction sent....");
     resultAggregateService.addResult($scope.getLeague().id, homeParticipantId, homeScore, awayParticipantId, awayScore)
       .then(function() {
         console.log("Result added successfully");
-        $scope.$parent.showSuccessMessage("Result added successfully");
+        messagesService.setSuccessMessage("Result added successfully");
         $scope.refreshAll();
       })
       .catch(function(e) {
         console.error(e);
-        $scope.$parent.showErrorMessage("There was an error when adding the result");
+        messagesService.setErrorMessage("There was an error when adding the result");
     });
   };
 
   $scope.acceptResult = function(resultId) {
-    $scope.$parent.showInfoMessage("Result accept transaction sent....");
+    messagesService.setInfoMessage("Result accept transaction sent....");
     resultAggregateService.acceptResult($scope.getLeague().id, resultId)
       .then(function() {
         console.log("Result accepted successfully");
-        $scope.$parent.showSuccessMessage("Result accepted successfully");
+        messagesService.setSuccessMessage("Result accepted successfully");
         $scope.refreshAll();
       }).catch(function(e) {
       console.error(e);
-      $scope.$parent.showErrorMessage("There was an error when adding the result");
+      messagesService.setErrorMessage("There was an error when adding the result");
     });
   };
 

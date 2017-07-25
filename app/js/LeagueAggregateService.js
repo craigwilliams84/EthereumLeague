@@ -195,6 +195,7 @@ require('angular').module('EtherLeagueServices').service('leagueAggregateService
               participantScores: leagueDetails[3],
               entryFee: leagueDetails[4],
               entryFeeForDisplay: web3.fromWei(leagueDetails[4], "ether").toString(),
+              prizeForDisplay: web3.fromWei(leagueDetails[4] * leagueDetails[1].length, "ether").toString(),
               status: getStatus(leagueDetails[5]),
               userRoles: userRoles
             };

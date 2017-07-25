@@ -1,0 +1,9 @@
+<div class="alert alert-success" role="alert" ng-hide="!messagesService.getMessages().successMessage">
+    {{ messagesService.getMessages().successMessage }}
+</div>
+<div class="alert alert-info" role="alert" ng-hide="!messagesService.getMessages().infoMessage">
+    {{ messagesService.getMessages().infoMessage }}
+</div>
+<div class="alert alert-danger" role="alert" ng-hide="!messagesService.getMessages().errorMessage">
+    {{ messagesService.getMessages().errorMessage }}
+</div>

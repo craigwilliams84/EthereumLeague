@@ -1,11 +1,13 @@
 <div class="panel-group" id="accordion">
-    <div class="panel {{shouldHideLeagueHeader() ? 'panel-default' : 'panel-primary'}}" ng-repeat="league in leagues">
+    <div class="league-panel panel {{shouldHideLeagueHeader() ? 'panel-default' : 'panel-default'}}" ng-repeat="league in leagues">
         <div class="panel-heading" ng-hide="shouldHideLeagueHeader()">
             <h4 class="panel-title">
-                <a ng-href="#/leagueDetails/{{league.id.toString()}}">{{ league.name }}</a>
-                <div class="leagueRole" ng-repeat="role in league.userRoles">
-                    {{ role }}&#160;
-                </div>
+                <a ng-href="#/leagueDetails/{{league.id.toString()}}">
+                    {{ league.name }}
+                    <div class="leagueRole" ng-repeat="role in league.userRoles">
+                        {{ role }}&#160;
+                    </div>
+                </a>
             </h4>
         </div>
         <div id="#collapse1" class="panel-collapse collapse in">

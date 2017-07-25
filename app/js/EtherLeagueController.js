@@ -1,12 +1,15 @@
-require('angular').module('etherLeagueApp').controller("etherLeagueController", ['$scope', '$window', '$timeout', 'leagueAggregateService', 'accountsService', function($scope, $window, $timeout, leagueAggregateService, accountsService) {
+require('angular').module('etherLeagueApp').controller("etherLeagueController", ['$scope', '$rootScope', '$location', '$timeout', 'leagueAggregateService', 'accountsService', 'messagesService', function($scope, $rootScope, $location, $timeout, leagueAggregateService, accountsService, messagesService) {
 
   $scope.balance = "";
-  $scope.infoMessage = "";
-  $scope.successMessage = "";
-  $scope.errorMessage = "";
+  $scope.account = "";
+  $scope.messages;
 
   $scope.adminLeagues = [];
   $scope.participantLeagues = [];
+
+  $scope.isLoggedIn = false;
+
+  $scope.isNavCollapsed = true;
 
   $scope.refreshAll = function() {
     $timeout(function() {
@@ -26,56 +29,30 @@ require('angular').module('etherLeagueApp').controller("etherLeagueController", 
     });
   };
 
-  $scope.showInfoMessage = function(message) {
-    setMessages(message, "", "");
-  };
-
-  $scope.showSuccessMessage = function(message) {
-    setMessages("", message, "");
-  };
-
-  $scope.showErrorMessage = function(message) {
-    setMessages("", "", message);
-  };
-  
-  var setMessages = function(info, success, error) {
-    $timeout(function() {
-      $scope.infoMessage = info;
-      $scope.successMessage = success;
-      $scope.errorMessage = error;
+  $scope.startLogin = function() {
+    accountsService.init(function() {
+      $scope.refreshAll();
+      $timeout(function() {
+        $scope.isLoggedIn = true;
+        $scope.account = accountsService.getMainAccount();
+        $location.path("/loginSuccess/");
+      });
     });
   };
 
-  accountsService.init(function() {
-    $scope.refreshAll();
+  $scope.$on('$locationChangeStart', function(event) {
+    messagesService.setMessages("", "", "");
+
+    $timeout(function() {
+      $scope.isNavCollapsed = true;
+    });
   });
 
-  $scope.$on('$locationChangeStart', function(event) {
-    setMessages("", "", "");
+  $rootScope.$on('messagesUpdated', function(event) {
+    var messages = messagesService.getMessages();
+
+    $timeout(function() {
+      $scope.messages = messages;
+    });
   });
 }]);
-
-function fromAscii(str, padding) {
-  var hex = '0x';
-  for (var i = 0; i < str.length; i++) {
-    var code = str.charCodeAt(i);
-    var n = code.toString(16);
-    hex += n.length < 2 ? '0' + n : n;
-  }
-  return hex + '0'.repeat(padding * 2 - hex.length + 2);
-}
-
-function toAscii(hex) {
-  var str = '',
-    i = 0,
-    l = hex.length;
-  if (hex.substr(0, 2) === '0x') {
-    i = 2;
-  }
-  for (; i < l; i += 2) {
-    var code = parseInt(hex.substr(i, 2), 16);
-    if (code === 0) continue; // this is added
-    str += String.fromCharCode(code);
-  }
-  return str;
-}
