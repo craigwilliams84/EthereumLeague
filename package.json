@@ -8,13 +8,16 @@
   },
   "dependencies": {
     "angular": "^1.6.5",
+    "angular-animate": "^1.6.5",
     "angular-ui-bootstrap": "^2.5.0",
     "angular-route": "^1.6.5",
     "angular-sanitize": "^1.6.5",
     "bootstrap": "^3.3.7",
     "eth-lightwallet": "^2.5.6",
+    "font-awesome": "^4.7.0",
     "hooked-web3-provider": "^1.0.0",
     "truffle-contract": "^2.0.2",
+    "ui-select": "0.19.8",
     "web3": "^0.20.0"
   },
   "repository": {},

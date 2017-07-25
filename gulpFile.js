@@ -33,7 +33,7 @@ gulp.task('clean', function (cb) {
 //
 /////////////////////////////////////////////////////////////////////////////////////
 
-gulp.task('build-css', ['clean', 'build-bootstrap-css'], function() {
+gulp.task('build-css', ['clean', 'build-bootstrap-css', 'build-font-awesome-css', 'build-ui-select-css'], function() {
   return gulp.src('./app/css/*')
     .pipe(gulp.dest('./dist/css/'));
 });
@@ -51,12 +51,55 @@ gulp.task('build-bootstrap-css', ['clean'], function() {
 
 /////////////////////////////////////////////////////////////////////////////////////
 //
+// Copy font-awesome css
+//
+/////////////////////////////////////////////////////////////////////////////////////
+
+gulp.task('build-font-awesome-css', ['clean'], function() {
+  return gulp.src('./node_modules/font-awesome/css/font-awesome.min.css')
+    .pipe(gulp.dest('./dist/css/'));
+});
+
+/////////////////////////////////////////////////////////////////////////////////////
+//
+// Copy ui-select css
+//
+/////////////////////////////////////////////////////////////////////////////////////
+
+gulp.task('build-ui-select-css', ['clean'], function() {
+  return gulp.src('./node_modules/ui-select/dist/select.min.css')
+    .pipe(gulp.dest('./dist/css/'));
+});
+
+/////////////////////////////////////////////////////////////////////////////////////
+//
+// Copy css
+//
+/////////////////////////////////////////////////////////////////////////////////////
+
+gulp.task('build-fonts', ['clean', 'build-bootstrap-fonts', 'build-font-awesome-fonts'], function() {
+  return;
+});
+
+/////////////////////////////////////////////////////////////////////////////////////
+//
 // Copy bootstrap fonts
 //
 /////////////////////////////////////////////////////////////////////////////////////
 
 gulp.task('build-bootstrap-fonts', ['clean'], function() {
   return gulp.src('./node_modules/bootstrap/dist/fonts/*')
+    .pipe(gulp.dest('./dist/fonts/'));
+});
+
+/////////////////////////////////////////////////////////////////////////////////////
+//
+// Copy font-awesome fonts
+//
+/////////////////////////////////////////////////////////////////////////////////////
+
+gulp.task('build-font-awesome-fonts', ['clean'], function() {
+  return gulp.src('./node_modules/font-awesome/fonts/*')
     .pipe(gulp.dest('./dist/fonts/'));
 });
 
@@ -130,7 +173,7 @@ gulp.task('build-html', ['clean'], function() {
 /////////////////////////////////////////////////////////////////////////////////////
 
 gulp.task('build', [], function(cb) {
-  return sequence(['clean', 'build-html', 'build-bootstrap-fonts', 'build-css', 'build-images', 'build-js'] , cb);
+  return sequence(['clean', 'build-html', 'build-fonts', 'build-css', 'build-images', 'build-js'] , cb);
 });
 
 /////////////////////////////////////////////////////////////////////////////////////

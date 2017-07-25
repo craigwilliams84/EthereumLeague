@@ -1,4 +1,5 @@
-require('angular').module('etherLeagueApp').controller('joinLeagueCtrl', ['$scope', '$routeParams', '$timeout', 'leagueAggregateService', 'leagueListCtrlCommon', function($scope, $routeParams, $timeout, leagueAggregateService, leagueListCtrlCommon) {
+require('angular').module('etherLeagueApp').controller('searchLeaguesCtrl', ['$scope', '$timeout', 'leagueAggregateService', 'messagesService', function($scope, $timeout, leagueAggregateService, messagesService) {
+  $scope.messagesService = messagesService;
   $scope.leagues = [];
 
   $scope.refreshLeagues = function() {
@@ -19,15 +20,15 @@ require('angular').module('etherLeagueApp').controller('joinLeagueCtrl', ['$scop
   };
 
   $scope.joinLeague = function(teamName) {
-    $scope.$parent.showInfoMessage("Join league transaction sent....");
+    messagesService.setInfoMessage("Join league transaction sent....");
     leagueAggregateService.joinLeague($scope.leagues[0], teamName)
       .then(function() {
         console.log("League joined successfully");
-        $scope.$parent.showSuccessMessage("League joined successfully");
+        messagesService.setSuccessMessage("League joined successfully");
       })
       .catch(function(err) {
         console.error(err);
-        $scope.$parent.showErrorMessage("An error occurred when attempting to join the league");
+        messagesService.setErrorMessage("An error occurred when attempting to join the league");
       })
   };
 

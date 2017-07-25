@@ -1,9 +1,76 @@
-<div class="page-header">
-    <h2>{{ getLeague().name }}</h2>
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            {{ getLeague().name }} <small>{{ getLeague().status.toString() }}</small>
+        </h1>
+    </div>
+</div>
+<ng-include src="'messages.html'"></ng-include>
+
+<div class="row">
+    <div class="col-lg-3 col-md-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-money fa-5x"></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{ getLeague().entryFeeForDisplay }} eth</div>
+                        <div>Entry Fee</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="panel panel-green">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-user fa-5x"></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{ getLeague().entries.length }}</div>
+                        <div>Entrants</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="panel panel-yellow">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-trophy fa-5x"></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{ getLeague().prizeForDisplay }} eth</div>
+                        <div>Prize</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="panel panel-red">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-list fa-5x"></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{ pendingResults.length }}</div>
+                        <div>Pending Results</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <div class="row">
-    <div class="col-sm-3"><p>&#160;</p></div>
-    <div class="col-sm-6">
+    <div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4 class="panel-title">
@@ -20,9 +87,42 @@
             </div>
         </div>
     </div>
-    <div class="col-sm-3"><p>&#160;</p></div>
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    Actions
+                </h4>
+            </div>
+            <div id="adminActions" class="action-button" ng-show="isAdmin()">
+                <h4>
+                    Admin
+                </h4>
+                <a href ng-click="showAddRefereeModal()">
+                    <div class="panel-footer">
+                        <span class="pull-left">Add Referee</span>
+                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                        <div class="clearfix"></div>
+                    </div>
+                </a>
+            </div>
+            <div class="panel-body">
+                <div id="refereeActions" ng-show="isReferee()">
+                    <h4>
+                        Referee
+                    </h4>
+                    <a href ng-click="showAddResultModal()">
+                        <div class="panel-footer">
+                            <span class="pull-left">Add Result</span>
+                            <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                            <div class="clearfix"></div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<ng-include src="'league.html'"></ng-include>
 <div class="row" ng-show="hasPendingResults()">
     <div class="col-sm-12">
         <div class="panel panel-default">
@@ -56,66 +156,71 @@
         </div>
     </div>
 </div>
-<div class="row">
-    <div class="col-sm-12">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4 class="panel-title">
-                    Actions
-                </h4>
+
+<!-- Modal -->
+<script type="text/ng-template" id="addRefereeModal.html">
+    <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Add Referee</h3>
+    </div>
+    <div class="modal-body" id="modal-body">
+        <div>
+            <div class="form-group">
+                <label for="inputName">Referee Name</label>
+                <input type="text" class="form-control" id="inputName" placeholder="Alan Smith" ng-model="refereeName">
             </div>
-            <div class="panel-body">
-                <div id="adminActions" ng-show="isAdmin()">
-                    <h4>
-                        Admin
-                    </h4>
-                    <div id="addReferee">
-                        <h5>
-                            Add Referee
-                        </h5>
-                        <div class="actionsFirstInput col-sm-4">
-                            <input type="text" class="form-control" ng-model="refereeName" placeholder="Referee Name"/>
-                        </div>
-                        <div class="col-sm-5">
-                            <div class="input-group">
-                                <input type="text" class="form-control" ng-model="refereeAddress" placeholder="Referee Address"/>
-                                <span class="input-group-btn">
-                                    <button id="join" class="btn btn-primary" type="button" ng-click="addReferee(refereeName, refereeAddress)">Add</button>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="panel-body">
-                <div id="refereeActions" ng-show="isReferee()">
-                    <h4>
-                        Referee
-                    </h4>
-                    <div id="addResult">
-                        <h5>
-                            Add Result
-                        </h5>
-                        <div class="actionsFirstInput col-sm-1">
-                            <input type="text" class="form-control" ng-model="homeId" placeholder="Home Id"/>
-                        </div>
-                        <div class="col-sm-1">
-                            <input type="text" class="form-control" ng-model="homeScore" placeholder="Home Score"/>
-                        </div>
-                        <div class="col-sm-1">
-                            <input type="text" class="form-control" ng-model="awayId" placeholder="Away Id"/>
-                        </div>
-                        <div class="col-sm-1">
-                            <input type="text" class="form-control" ng-model="awayScore" placeholder="Away Score"/>
-                        </div>
-                        <div class="col-sm-5">
-                            <button id="addResult" class="btn btn-primary" type="button"
-                                    ng-click="addResult(homeId, homeScore, awayId, awayScore)">Add</button>
-                        </div>
-                    </div>
-                </div>
+            <div class="form-group">
+                <label for="inputAddress">Referee Public Address</label>
+                <input type="text" class="form-control" id="inputAddress" placeholder="9b59808df8566db070b3c8cf96a531c6a59807bf" ng-model="refereeAddress">
             </div>
         </div>
     </div>
-</div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" ng-click="close()">Cancel</button>
+        <button type="button" class="btn btn-success" ng-click="addReferee(refereeName, refereeAddress)">Add</button>
+    </div>
+</script>
+
+<!-- Modal -->
+<script type="text/ng-template" id="addResultModal.html">
+    <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Add Result</h3>
+    </div>
+    <div class="modal-body" id="modal-body">
+        <div class="row">
+            <div class="small-right-padding col-md-3">
+                <ui-select ng-model="selectedHomeParticipant.value">
+                    <ui-select-match>
+                        <span ng-bind="$select.selected.name"></span>
+                    </ui-select-match>
+                    <ui-select-choices repeat="participant in (participants | filter: $select.search) track by participant.id">
+                        <span ng-bind="participant.name"></span>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="score-input form-control" ng-model="homeScore">
+            </div>
+            <div class="versus col-md-2 text-center">
+                vs
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="score-input form-control" ng-model="awayScore">
+            </div>
+            <div class="small-left-padding col-md-3">
+                <ui-select ng-model="selectedAwayParticipant.value">
+                    <ui-select-match>
+                        <span ng-bind="$select.selected.name"></span>
+                    </ui-select-match>
+                    <ui-select-choices repeat="participant in (participants | filter: $select.search) track by participant.id">
+                        <span ng-bind="participant.name"></span>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" ng-click="close()">Cancel</button>
+        <button type="button" class="btn btn-success" ng-click="addResult(homeParticipantId, homeScore, awayParticipantId, awayScore)">Add</button>
+    </div>
+</script>
 

@@ -7,7 +7,7 @@ require('angular').module('EtherLeagueServices').service('resultAggregateService
   this.addResult = function(leagueId, homeParticipantId, homeScore, awayParticipantId, awayScore) {
     return getResultAggregate()
       .then(function(resultAgg) {
-        return resultAgg.addResult(leagueId, homeParticipantId, homeScore, awayParticipantId, awayScore, {
+        return resultAgg.addResult(leagueId, homeParticipantId.valueOf(), homeScore, awayParticipantId.valueOf(), awayScore, {
           from: accountsService.getMainAccount(),
           gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
         });

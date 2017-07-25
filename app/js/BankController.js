@@ -1,17 +1,18 @@
-require('angular').module('etherLeagueApp').controller('bankCtrl', ['$scope', '$routeParams', '$timeout', 'leagueAggregateService', function($scope, $routeParams, $timeout, leagueAggregateService) {
+require('angular').module('etherLeagueApp').controller('bankCtrl', ['$scope', '$timeout', 'leagueAggregateService', 'messagesService', function($scope, $timeout, leagueAggregateService, messagesService) {
 
+  $scope.messagesService = messagesService;
   $scope.availableFunds = 0;
 
   $scope.withdrawFunds = function() {
-    $scope.$parent.showInfoMessage("Funds withdrawal transaction sent....");
+    messagesService.setInfoMessage("Funds withdrawal transaction sent....");
     leagueAggregateService.withdrawFunds()
       .then(function() {
-        $scope.$parent.showSuccessMessage("Funds withdrawn successfully");
+        messagesService.setSuccessMessage("Funds withdrawn successfully");
         init();
       })
       .catch(function(err) {
         console.error(err);
-        $scope.$parent.showErrorMessage("An error occured when withdrawing the funds");
+        messagesService.setErrorMessage("An error occured when withdrawing the funds");
       });
   };
 
