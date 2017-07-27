@@ -99,7 +99,7 @@
                     Admin
                 </h4>
                 <a href ng-click="showAddRefereeModal()">
-                    <div class="panel-footer">
+                    <div class="action-button">
                         <span class="pull-left">Add Referee</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                         <div class="clearfix"></div>
@@ -112,7 +112,7 @@
                         Referee
                     </h4>
                     <a href ng-click="showAddResultModal()">
-                        <div class="panel-footer">
+                        <div class="action-button">
                             <span class="pull-left">Add Result</span>
                             <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                             <div class="clearfix"></div>
@@ -122,9 +122,7 @@
             </div>
         </div>
     </div>
-</div>
-<div class="row" ng-show="hasPendingResults()">
-    <div class="col-sm-12">
+    <div class="col-md-6" ng-show="hasPendingResults()">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4 class="panel-title">
@@ -132,32 +130,43 @@
                 </h4>
             </div>
             <div class="panel-body">
-                <div class="row" ng-repeat="result in pendingResults">
-                    <div class="col-sm-3 text-center" >
-                        {{ getParticipantName(result.homeParticipantId) }}
+                <div class="result" ng-repeat="result in pendingResults">
+                    <div class="row" ng-click="showPendingResultModal(result)">
+                        <div class="result-details col-xs-9 vcenter">
+                            <div class="row">
+                                <div class="col-xs-9" >
+                                    {{ getParticipantName(result.homeParticipantId) }}
+                                </div>
+                                <div class="col-xs-3">
+                                    <div class="pull-right">
+                                        {{ result.homeScore.toString() }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-xs-9">
+                                    {{ getParticipantName(result.awayParticipantId) }}
+                                </div>
+                                <div class="col-xs-3">
+                                    <div class="pull-right">
+                                        {{ result.awayScore.toString() }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-2 vcenter">
+                            <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                        </div>
                     </div>
-                    <div class="col-sm-2 text-center">
-                        {{ result.homeScore.toString() }}
-                    </div>
-                    <div class="col-sm-1 text-center">
-                        v
-                    </div>
-                    <div class="col-sm-2 text-center">
-                        {{ result.awayScore.toString() }}
-                    </div>
-                    <div class="col-sm-3 text-center">
-                        {{ getParticipantName(result.awayParticipantId) }}
-                    </div>
-                    <div class="col-sm-1">
-                        <button ng-show="canAcceptPendingResult(result)" id="acceptResult" class="btn btn-primary" type="button" ng-click="acceptResult(result.id)">Accept</button>
-                    </div>
+                    <hr/>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Modals -->
 <script type="text/ng-template" id="addRefereeModal.html">
     <div class="modal-header">
         <h3 class="modal-title" id="modal-title">Add Referee</h3>
@@ -180,7 +189,6 @@
     </div>
 </script>
 
-<!-- Modal -->
 <script type="text/ng-template" id="addResultModal.html">
     <div class="modal-header">
         <h3 class="modal-title" id="modal-title">Add Result</h3>
@@ -221,6 +229,30 @@
     <div class="modal-footer">
         <button type="button" class="btn btn-default" ng-click="close()">Cancel</button>
         <button type="button" class="btn btn-success" ng-click="addResult(homeParticipantId, homeScore, awayParticipantId, awayScore)">Add</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="pendingResultModal.html">
+    <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Pending Result</h3>
+    </div>
+    <div class="modal-body" id="modal-body">
+        <div ng-show="canAcceptPendingResult()">
+            If in your opinion, the result is correct, click the 'Accept' button.  Otherwise, click 'Reject' to escalate.
+        </div>
+        <div ng-hide="canAcceptPendingResult()">
+            You have already acted for this pending result, and we are current waiting for your opponent to accept or reject.
+        </div>
+    </div>
+    <div class="modal-footer">
+        <div ng-show="canAcceptPendingResult()">
+            <button type="button" class="btn btn-default" ng-click="close()">Cancel</button>
+            <button type="button" class="btn btn-danger" ng-click="rejectResult()">Reject</button>
+            <button type="button" class="btn btn-success" ng-click="acceptResult()">Accept</button>
+        </div>
+        <div ng-hide="canAcceptPendingResult()">
+            <button type="button" class="btn btn-default" ng-click="close()">OK</button>
+        </div>
     </div>
 </script>
 

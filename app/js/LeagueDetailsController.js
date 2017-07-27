@@ -37,18 +37,17 @@ require('angular').module('etherLeagueApp').controller('leagueDetailsCtrl', ['$s
     modalService.openModal("addResultModal", resolve);
   };
 
-  $scope.addResult = function(homeParticipantId, homeScore, awayParticipantId, awayScore) {
-    messagesService.setInfoMessage("Add result transaction sent....");
-    resultAggregateService.addResult($scope.getLeague().id, homeParticipantId, homeScore, awayParticipantId, awayScore)
-      .then(function() {
-        console.log("Result added successfully");
-        messagesService.setSuccessMessage("Result added successfully");
-        $scope.refreshAll();
-      })
-      .catch(function(e) {
-        console.error(e);
-        messagesService.setErrorMessage("There was an error when adding the result");
-    });
+  $scope.showPendingResultModal = function(result) {
+    var resolve = {
+      result: function() {
+        return result;
+      },
+      leagueId: function() {
+        return $scope.getLeague().id;
+      }
+    };
+
+    modalService.openModal("pendingResultModal", resolve);
   };
 
   $scope.acceptResult = function(resultId) {
@@ -97,15 +96,6 @@ require('angular').module('etherLeagueApp').controller('leagueDetailsCtrl', ['$s
     }
 
     return leagueDetails.participantNames[index];
-  };
-
-  $scope.canAcceptPendingResult = function(result) {
-    if (result.actedAddress == "0x" + accountsService.getMainAccount()) {
-      //Already acted
-      return false;
-    }
-
-    return true;
   };
 
   var init = function() {

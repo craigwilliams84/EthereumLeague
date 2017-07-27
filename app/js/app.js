@@ -56,3 +56,4 @@ require('LeagueListControllerCommon');
 require('MyLeaguesController');
 require('AddRefereeModalController');
 require('AddResultModalController');
+require('PendingResultModalController');
