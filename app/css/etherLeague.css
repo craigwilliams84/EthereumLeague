@@ -57,3 +57,26 @@
 .versus {
     margin-top: 5px;
 }
+
+.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+
+.result{
+    cursor: pointer;
+}
+
+.result:hover {
+    background-color: #f5f5f5;
+}
+
+.result hr {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.result .result-details {
+    margin-left: 4%;
+}
