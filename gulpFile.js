@@ -125,7 +125,7 @@ gulp.task('build-js', function() {
   var b = browserify({
     entries: './app/js/app.js',
     debug: true,
-    paths: ['./app/js'],
+    paths: ['./app/js/controllers', './app/js/services'],
     transform: [ngAnnotate]
   });
 

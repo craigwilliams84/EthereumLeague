@@ -1,5 +1,5 @@
 contract = require("truffle-contract");
-resultAggregateContract = require("../../build/contracts/ResultAggregate.json");
+resultAggregateContract = require("../../../build/contracts/ResultAggregate.json");
 ResultAggregate = contract(resultAggregateContract);
 
 require('angular').module('EtherLeagueServices').service('resultAggregateService', ['accountsService', 'leagueAggregateService', function(accountsService, leagueAggregateService) {
