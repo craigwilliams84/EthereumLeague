@@ -1,5 +1,5 @@
 contract = require("truffle-contract");
-leagueAggregateContract = require("../../build/contracts/LeagueAggregate.json");
+leagueAggregateContract = require("../../../build/contracts/LeagueAggregate.json");
 LeagueAggregate = contract(leagueAggregateContract);
 
 const ADMIN = "Admin";
