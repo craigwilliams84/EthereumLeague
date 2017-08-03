@@ -1,4 +1,4 @@
-require('angular').module('etherLeagueApp').controller("addResultModalCtrl", ['$scope', '$timeout', '$uibModalInstance', 'resultAggregateService', 'messagesService', 'league', function($scope, $timeout, $uibModalInstance, resultAggregateService, messagesService, league) {
+require('angular').module('etherLeagueApp').controller("addResultModalCtrl", ['$scope', '$uibModalInstance', 'resultAggregateService', 'messagesService', 'league', function($scope, $uibModalInstance, resultAggregateService, messagesService, league) {
 
   $scope.participants;
   $scope.selectedHomeParticipant = {value: {}};
