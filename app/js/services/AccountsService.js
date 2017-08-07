@@ -2,8 +2,7 @@ require('angular').module('EtherLeagueServices', []).service('accountsService', 
 
   var accounts = [];
   var account = "";
-  var initialised = false;
-  var initPromiseResolves = [];
+  var loggedIn = true;
 
   this.getBalance = function(callback) {
 
@@ -17,57 +16,18 @@ require('angular').module('EtherLeagueServices', []).service('accountsService', 
     return accounts[0];
   };
 
-  this.init = function(onInitialised) {
-    var seed = prompt('Enter your private key seed', 'edge add ketchup champion panda pink basket develop trash capable arena fault');
-    // the seed is stored in memory and encrypted by this user-defined password
-    var password = prompt('Enter password to encrypt the seed', 'dev_password');
+  this.login = function(loginStrategy) {
+    return loginStrategy()
+      .then(function() {
+        accounts = web3.eth.accounts;
+        account = "0x" + accounts[0];
+        console.log("Your account is " + accounts[0]);
 
-    lightwallet.keystore.deriveKeyFromPassword(password, function(err, _pwDerivedKey) {
-      pwDerivedKey = _pwDerivedKey;
-      ks = new lightwallet.keystore(seed, pwDerivedKey);
+        LeagueAggregate.setProvider(web3.currentProvider);
+        ResultAggregate.setProvider(web3.currentProvider);
 
-      // Create a custom passwordProvider to prompt the user to enter their
-      // password whenever the hooked web3 provider issues a sendTransaction
-      // call.
-      ks.passwordProvider = function(callback) {
-        var pw = prompt("Please enter password to sign your transaction", "dev_password");
-        callback(null, pw);
-      };
-
-      var provider = new HookedWeb3Provider({
-        // Let's pick the one that came with Truffle
-        host: web3.currentProvider.host,
-        transaction_signer: ks
+        loggedIn = true;
       });
-      web3.setProvider(provider);
-      // And since Truffle v2 uses EtherPudding v3, we also need the line:
-      LeagueAggregate.setProvider(provider);
-      ResultAggregate.setProvider(provider);
-
-      // Generate the first address out of the seed
-      ks.generateNewAddress(pwDerivedKey);
-
-      accounts = ks.getAddresses();
-      account = "0x" + accounts[0];
-      console.log("Your account is " + accounts[0]);
-      initialised = true;
-      onInitialised();
-      initPromiseResolves.forEach(function(resolve) {
-        resolve();
-      });
-    });
-  };
-
-  this.whenInitialised = function() {
-    var promise = new Promise(function(resolve, reject) {
-      if (initialised) {
-        resolve();
-      } else {
-        initPromiseResolves.push(resolve);
-      }
-    });
-
-    return promise;
   };
 
 }]);

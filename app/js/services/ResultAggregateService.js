@@ -9,7 +9,7 @@ require('angular').module('EtherLeagueServices').service('resultAggregateService
       .then(function(resultAgg) {
         return resultAgg.addResult(leagueId, homeParticipantId.valueOf(), homeScore, awayParticipantId.valueOf(), awayScore, {
           from: accountsService.getMainAccount(),
-          gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
+          gas: 3000000
         });
       });
   };
@@ -27,7 +27,7 @@ require('angular').module('EtherLeagueServices').service('resultAggregateService
       .then(function(resultAgg) {
         return resultAgg.acceptResult(leagueId, resultId.valueOf(), {
           from: accountsService.getMainAccount(),
-          gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
+          gas: 3000000
         });
       });
   };

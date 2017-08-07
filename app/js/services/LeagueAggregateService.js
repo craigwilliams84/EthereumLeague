@@ -15,7 +15,7 @@ require('angular').module('EtherLeagueServices').service('leagueAggregateService
         return leagueAgg.addLeague(web3.fromAscii(name), pointsForWin,
           pointsForDraw, web3.toWei(entryFeeEther, "ether"), numOfEntrants, timesToPlay, {
           from: accountsService.getMainAccount(),
-          gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
+          gas: 3000000
         });
       });
   };
@@ -25,7 +25,7 @@ require('angular').module('EtherLeagueServices').service('leagueAggregateService
       .then(function(leagueAgg) {
         return leagueAgg.joinLeague(leagueDetails.id, web3.fromAscii(teamName), {
           from: accountsService.getMainAccount(), value: leagueDetails.entryFee,
-          gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
+          gas: 3000000
         });
       })
   };
@@ -35,7 +35,7 @@ require('angular').module('EtherLeagueServices').service('leagueAggregateService
       .then(function(leagueAgg) {
         return leagueAgg.addRefereeToLeague(leagueId, refereeAddress, {
           from: accountsService.getMainAccount(),
-          gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
+          gas: 3000000
         });
       })
   };
@@ -45,15 +45,14 @@ require('angular').module('EtherLeagueServices').service('leagueAggregateService
       .then(function(leagueAgg) {
         return leagueAgg.withdrawFunds({
           from: accountsService.getMainAccount(),
-          gas: 3000000, gasPrice: web3.eth.gasPrice.toString(10)
+          gas: 3000000
         });
       })
   };
 
   this.getMyLeagues = function() {
     var myLeagues = [];
-    return accountsService.whenInitialised()
-      .then(this.getAdminLeagueIds)
+    return this.getAdminLeagueIds()
       .then(function(leagueIds) {
         return getLeagueDetailsForIds(leagueIds, ADMIN);
       })

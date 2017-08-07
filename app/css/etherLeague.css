@@ -84,3 +84,8 @@
 .result .result-details {
     margin-left: 4%;
 }
+
+.metamask-button img {
+    width: 15%;
+    height: auto;
+}

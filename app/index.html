@@ -40,7 +40,7 @@
         <!-- Top Menu Items -->
         <ul class="nav navbar-right top-nav">
             <li class="dropdown" ng-hide="isLoggedIn">
-                <a href="#" ng-click="startLogin()"><i class="fa fa-user"></i> Login </a>
+                <a href="#" ng-click="showLoginModal()"><i class="fa fa-user"></i> Login </a>
             </li>
             <li ng-show="isLoggedIn">
                 <a href="#"><i class="fa fa-id-card"></i> {{ account }}</a>
@@ -100,6 +100,20 @@
 
 </div>
 <!-- /#wrapper -->
+
+<script type="text/ng-template" id="loginModal.html">
+    <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Login</h3>
+    </div>
+    <div class="modal-body" id="modal-body">
+        <div class="text-center">
+            <div type="button" class="btn btn-success" ng-click="metamaskLogin()">Metamask</div>
+            <button type="button" class="btn btn-success" ng-click="mnemonicLogin()">Mnemonic</button>
+        </div>
+    </div>
+    <div class="modal-footer">
+    </div>
+</script>
 
 </body>
 

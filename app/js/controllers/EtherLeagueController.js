@@ -1,4 +1,4 @@
-require('angular').module('etherLeagueApp').controller("etherLeagueController", ['$scope', '$rootScope', '$location', '$timeout', 'leagueAggregateService', 'accountsService', 'messagesService', function($scope, $rootScope, $location, $timeout, leagueAggregateService, accountsService, messagesService) {
+require('angular').module('etherLeagueApp').controller("etherLeagueController", ['$scope', '$rootScope', '$location', '$timeout', 'leagueAggregateService', 'accountsService', 'messagesService', 'modalService', function($scope, $rootScope, $location, $timeout, leagueAggregateService, accountsService, messagesService, modalService) {
 
   $scope.balance = "";
   $scope.account = "";
@@ -29,15 +29,16 @@ require('angular').module('etherLeagueApp').controller("etherLeagueController", 
     });
   };
 
-  $scope.startLogin = function() {
-    accountsService.init(function() {
-      $scope.refreshAll();
-      $timeout(function() {
-        $scope.isLoggedIn = true;
-        $scope.account = accountsService.getMainAccount();
-        $location.path("/loginSuccess/");
+  $scope.showLoginModal = function() {
+    modalService.openModal("loginModal")
+      .result
+      .then(function() {
+        $timeout(function() {
+          $scope.isLoggedIn = true;
+          $scope.account = accountsService.getMainAccount();
+          $location.path("/loginSuccess/");
+        });
       });
-    });
   };
 
   $scope.$on('$locationChangeStart', function(event) {
