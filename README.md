@@ -2,6 +2,7 @@
 A decentralized sports / esports league management application built on top of the Ethereum blockchain.
 
 ## Current Features
+* Login via MetaMask or private key phrase.
 * Anyone with an Ethereum account can create a league specifying parameters such as the entry fee (in ether) and the number of particpiants.
 * League creators assign referee's to the league.
 * Anyone with a valid league id can join the league, as long as it is not already full (ie. the league is in progress).
