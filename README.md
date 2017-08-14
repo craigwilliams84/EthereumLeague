@@ -10,6 +10,11 @@ A decentralized sports / esports league management application built on top of t
 * Once all results have been submitted and confirmed, the winner is calculated, and funds are allocated to said winner.
 * The winner is then able to withdraw the funds to their Ethereum account.
 
+## TODO
+* Dispute resolution quorum
+* Referee approval quorum
+* Better bank features (eg. History of winnings)
+
 ## To run
 
 - Start a local ethereum client (geth / parity etc)
