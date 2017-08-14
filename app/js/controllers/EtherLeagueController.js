@@ -41,7 +41,7 @@ require('angular').module('etherLeagueApp').controller("etherLeagueController", 
   };
 
   $scope.$on('$locationChangeStart', function(event) {
-    messagesService.setMessages("", "", "");
+    messagesService.clearMessages();
 
     $timeout(function() {
       $scope.isNavCollapsed = true;
