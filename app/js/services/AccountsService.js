@@ -1,14 +1,17 @@
 require('angular').module('EtherLeagueServices').service('accountsService', [function() {
 
   var accounts = [];
-  var account = "";
-  var loggedIn = true;
 
-  this.getBalance = function(callback) {
+  this.getBalance = function() {
+    return new Promise(function(resolve, reject) {
+      web3.eth.getBalance(accounts[0], function(error, result) {
 
-    web3.eth.getBalance(accounts[0], function(error, result) {
+        if (error) {
+          reject(error);
+        }
 
-      callback(error, web3.fromWei(result,"ether"));
+        resolve(web3.fromWei(result,"ether"));
+      });
     });
   };
 
@@ -20,13 +23,10 @@ require('angular').module('EtherLeagueServices').service('accountsService', [fun
     return loginStrategy()
       .then(function() {
         accounts = web3.eth.accounts;
-        account = "0x" + accounts[0];
         console.log("Your account is " + accounts[0]);
 
         LeagueAggregate.setProvider(web3.currentProvider);
         ResultAggregate.setProvider(web3.currentProvider);
-
-        loggedIn = true;
       });
   };
 
