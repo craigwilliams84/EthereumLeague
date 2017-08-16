@@ -13,7 +13,7 @@ module.exports = function(config) {
     frameworks: ['browserify', 'jasmine'],
 
     files: [
-      'app/test/*ateService*.js'
+      'app/test/*.js'
     ],
 
     exclude: [
