@@ -29,6 +29,18 @@ require('angular').module('etherLeagueApp').controller("etherLeagueController", 
     });
   };
 
+  $scope.refreshBalance = function() {
+    accountsService.getBalance()
+      .then(function(balance) {
+        $timeout(function() {
+          $scope.balance = balance;
+        });
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
+  };
+
   $scope.showLoginModal = function() {
     modalService.openModal("loginModal")
       .result
