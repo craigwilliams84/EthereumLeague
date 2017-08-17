@@ -7,7 +7,6 @@ describe('ModalService', function() {
 
 
   beforeEach(angular.mock.module('EtherLeagueServices', function($provide) {
-    console.log("MODAL A");
     mockUibModal = {
       open: jasmine.createSpy()
     };
@@ -16,16 +15,12 @@ describe('ModalService', function() {
   }));
 
   beforeEach(function() {
-    console.log("MODAL B");
     inject(function($injector) {
       service = $injector.get('modalService');
     });
   });
 
   describe('openModal', function() {
-    beforeEach(function() {
-      console.log("MODAL C");
-    });
     it('opens modal via $uibModal', function() {
       service.openModal("name");
       expect(mockUibModal.open).toHaveBeenCalled();
