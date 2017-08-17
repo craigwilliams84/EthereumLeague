@@ -17,7 +17,6 @@ require('angular').module('EtherLeagueServices').service('resultAggregateService
   this.getMyPendingResults = function(leagueId) {
     return getPendingResultIds(leagueId)
       .then(function(resultIds) {
-        console.log("BLAH");
         return getResultDetailsForIds(leagueId, resultIds);
       })
       .then(filterResultsForUser);
