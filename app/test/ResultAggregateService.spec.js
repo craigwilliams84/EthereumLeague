@@ -111,5 +111,21 @@ describe('ResultAggregateService', function() {
       expect(result.actedAddress).toEqual(actedAddress);
     };
   });
+
+  describe('acceptResult', function() {
+
+    beforeEach(function() {
+      mockResultAggregate.acceptResult = jasmine.createSpy();
+    });
+
+    it('delegates to result aggregate', function(done) {
+      service.acceptResult(12, 34)
+        .then(function() {
+          expect(mockResultAggregate.acceptResult).toHaveBeenCalledWith(12, 34, jasmine.anything());
+          done();
+        })
+        .catch(done.fail);
+    });
+  });
 });
 
