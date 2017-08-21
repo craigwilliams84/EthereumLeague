@@ -7,7 +7,6 @@ HookedWeb3Provider = require('hooked-web3-provider');
 require('AccountsService');
 require('LoginService');
 require('LeagueAggregateService');
-require('LeagueCacheService');
 require('ResultAggregateService');
 require('MessagesService');
 require('ModalService');

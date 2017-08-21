@@ -7,7 +7,7 @@ const REFEREE = "Referee";
 const PARTICIPANT= "Participant";
 const STATUSES={0: "AWAITING PARTICIPANTS", 1: "IN PROGRESS", 2: "COMPLETED"};
 
-require('angular').module('EtherLeagueServices').service('leagueAggregateService', ['accountsService', 'leagueCacheService', function(accountsService, leagueCacheService) {
+require('angular').module('EtherLeagueServices').service('leagueAggregateService', ['accountsService', function(accountsService) {
 
   this.addLeague = function(name, pointsForWin, pointsForDraw, entryFeeEther, numOfEntrants, timesToPlay) {
     return getLeagueAggregate()
@@ -74,11 +74,6 @@ require('angular').module('EtherLeagueServices').service('leagueAggregateService
     return getLeagueAggregate()
       .then(function(leagueAgg) {
         return leagueAgg.getLeaguesForAdmin.call("0x" + accountsService.getMainAccount(), {from: accountsService.getMainAccount()})
-      })
-      .then(function(leagueIds) {
-        console.log("League ids length: " + leagueIds.length);
-        //resolve(createIdsAndRoles(leagueIds, ADMIN));
-        return leagueIds;
       });
   };
 
@@ -141,17 +136,6 @@ require('angular').module('EtherLeagueServices').service('leagueAggregateService
     });
   };
 
-  var createIdsAndRoles = function(leagueIds, role) {
-    var idsAndRoles = {};
-    leagueIds.forEach(function(leagueId){
-      var idAndRole = {};
-      idAndRole.id = leagueId;
-      idAndRole.role = role;
-    });
-
-    return idsAndRoles;
-  };
-
   var mergeLeagueRoles = function(leagues) {
     var leaguesMap = new Map();
     return new Promise(function(resolve) {
@@ -160,10 +144,8 @@ require('angular').module('EtherLeagueServices').service('leagueAggregateService
         if (existing) {
           existing.userRoles = existing.userRoles.concat(league.userRoles);
           leaguesMap.set(league.id, existing);
-          leagueCacheService.put(league.id, existing);
         } else {
           leaguesMap.set(league.id, league);
-          leagueCacheService.put(league.id, league);
         }
       });
 
@@ -171,40 +153,27 @@ require('angular').module('EtherLeagueServices').service('leagueAggregateService
     });
   };
 
-  var getLeagueDetails = function(id, useCache, ...userRoles) {
+  var getLeagueDetails = function(id, ...userRoles) {
+    return getLeagueAggregate()
+      .then(function(leagueAgg) {
+        return leagueAgg.getLeagueDetails.call(id.valueOf()).then(function(leagueDetails) {
+          var leagueDetails = {
+            'id': id.toString(),
+            name: web3.toAscii(leagueDetails[0]),
+            participantIds: leagueDetails[1],
+            participantNames: toAsciiArray(leagueDetails[2]),
+            participantScores: leagueDetails[3],
+            entryFee: leagueDetails[4],
+            entryFeeForDisplay: web3.fromWei(leagueDetails[4], "ether").toString(),
+            prizeForDisplay: web3.fromWei(leagueDetails[4] * leagueDetails[1].length, "ether").toString(),
+            status: getStatus(leagueDetails[5]),
+            userRoles: userRoles
+          };
 
-    return new Promise(function(resolve, reject) {
-      if (useCache) {
-        var cached = leagueCacheService.get(id);
-
-        if (cached) {
-          resolve(cached);
-          return;
-        }
-      }
-
-      return getLeagueAggregate()
-        .then(function(leagueAgg) {
-          return leagueAgg.getLeagueDetails.call(id.valueOf()).then(function(leagueDetails) {
-            var leagueDetails = {
-              'id': id.toString(),
-              name: web3.toAscii(leagueDetails[0]),
-              participantIds: leagueDetails[1],
-              participantNames: toAsciiArray(leagueDetails[2]),
-              participantScores: leagueDetails[3],
-              entryFee: leagueDetails[4],
-              entryFeeForDisplay: web3.fromWei(leagueDetails[4], "ether").toString(),
-              prizeForDisplay: web3.fromWei(leagueDetails[4] * leagueDetails[1].length, "ether").toString(),
-              status: getStatus(leagueDetails[5]),
-              userRoles: userRoles
-            };
-
-            addSortedEntriesToLeagueDetails(leagueDetails);
-            leagueCacheService.put(id, leagueDetails);
-            resolve(leagueDetails);
-          });
-        })
-    });
+          addSortedEntriesToLeagueDetails(leagueDetails);
+          return leagueDetails;
+        });
+      });
   };
 
   //TODO need to sort this
@@ -214,7 +183,7 @@ require('angular').module('EtherLeagueServices').service('leagueAggregateService
     var leagues = [];
     var promises = [];
     leagueIds.forEach(function(id) {
-      var promise = getLeagueDetails(id, false, role)
+      var promise = getLeagueDetails(id, role)
         .then(function(leagueDetails) {
           leagues.push(leagueDetails);
         });
