@@ -9,7 +9,8 @@ var gulp = require('gulp'),
   uglify = require('gulp-uglify'),
   gutil = require('gulp-util'),
   sequence = require('run-sequence'),
-  ngAnnotate = require('browserify-ngannotate');
+  ngAnnotate = require('browserify-ngannotate'),
+  flatten = require('gulp-flatten');
   exec = require('child_process').exec;
 
 var CacheBuster = require('gulp-cachebust');
@@ -34,7 +35,7 @@ gulp.task('clean', function (cb) {
 /////////////////////////////////////////////////////////////////////////////////////
 
 gulp.task('build-css', ['clean', 'build-bootstrap-css', 'build-font-awesome-css', 'build-ui-select-css'], function() {
-  return gulp.src('./app/css/*')
+  return gulp.src('./app/assets/css/*')
     .pipe(gulp.dest('./dist/css/'));
 });
 
@@ -110,7 +111,7 @@ gulp.task('build-font-awesome-fonts', ['clean'], function() {
 /////////////////////////////////////////////////////////////////////////////////////
 
 gulp.task('build-images', ['clean'], function() {
-  return gulp.src('./app/img/**/*')
+  return gulp.src('./app/assets/img/**/*')
     .pipe(gulp.dest('./dist/img/'));
 });
 
@@ -123,9 +124,9 @@ gulp.task('build-images', ['clean'], function() {
 
 gulp.task('build-js', function() {
   var b = browserify({
-    entries: './app/js/app.js',
+    entries: './app/components/app.js',
     debug: true,
-    paths: ['./app/js/controllers', './app/js/services'],
+    paths: ['./app/components/', './app/shared/'],
     transform: [ngAnnotate]
   });
 
@@ -161,8 +162,9 @@ gulp.task('build-contracts', function (cb) {
 /////////////////////////////////////////////////////////////////////////////////////
 
 gulp.task('build-html', ['clean'], function() {
-  return gulp.src(['./app/*.html'])
+  return gulp.src(['./app/*.html', './app/components/**/*.html', './app/shared/**/*.html'])
     .pipe(cachebust.references())
+    .pipe(flatten())
     .pipe(gulp.dest('dist'));
 });
 
@@ -196,7 +198,7 @@ gulp.task('test', ['build'], function (done) {
 /////////////////////////////////////////////////////////////////////////////////////
 
 gulp.task('watch', function() {
-  return gulp.watch(['./app/*.html', './app/css/*.*css', './app/js/**/*.js'], ['build']);
+  return gulp.watch(['./app/**/*.html', './app/assets/css/*.*css', './app/**/*.js'], ['build']);
 });
 
 /////////////////////////////////////////////////////////////////////////////////////

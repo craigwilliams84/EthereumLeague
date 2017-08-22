@@ -1,5 +1,5 @@
-require('../js/appConfig');
-require('../js/services/LeagueAggregateService');
+require('appConfig');
+require('./LeagueAggregateService');
 require('angular-mocks/ngMock');
 
 describe('LeagueAggregateService', function() {

@@ -1,5 +1,5 @@
-require('../js/appConfig');
-require('../js/services/MessagesService');
+require('appConfig');
+require('./MessagesService');
 require('angular-mocks/ngMock');
 
 describe('MessagesService', function() {

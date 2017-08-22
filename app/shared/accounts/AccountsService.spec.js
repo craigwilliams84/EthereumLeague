@@ -1,5 +1,5 @@
-require('../js/appConfig');
-require('../js/services/AccountsService');
+require('appConfig');
+require('./AccountsService');
 require('angular-mocks/ngMock');
 
 describe('AccountsService', function() {

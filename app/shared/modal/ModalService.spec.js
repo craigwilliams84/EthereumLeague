@@ -1,5 +1,5 @@
-require('../js/appConfig');
-require('../js/services/ModalService');
+require('appConfig');
+require('./ModalService');
 require('angular-mocks/ngMock');
 
 describe('ModalService', function() {
