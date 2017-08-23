@@ -16,12 +16,17 @@ describe('AccountsService', function() {
   });
 
   describe('login()', function() {
-    var mockLoginStrategy = jasmine.createSpy().and.returnValue(new Promise(function(resolve) {resolve()}));
+    var mockLoginStrategy = jasmine
+      .createSpy()
+      .and
+      .returnValue(
+        new Promise((resolve) => {
+          resolve(['0x4d91838268f6d6D4e590e8fd2a001Cd91c32e7A4', '0x4d91838268f6d6D4e590e8fd2a001Cd91c32eBBB'])
+        })
+      );
 
     beforeEach(function() {
-      web3.eth = {accounts: ['0x4d91838268f6d6D4e590e8fd2a001Cd91c32e7A4', '0x4d91838268f6d6D4e590e8fd2a001Cd91c32eBBB']};
       web3.currentProvider = {id: "mockProvider"};
-
       LeagueAggregate = {setProvider: jasmine.createSpy('setProvider')};
       ResultAggregate = {setProvider: jasmine.createSpy('setProvider')};
     });

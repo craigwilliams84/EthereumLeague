@@ -69,13 +69,13 @@ require('angular').module('etherLeagueApp').controller('leagueDetailsCtrl', ['$s
 
   $scope.isAdmin = function() {
     if ($scope.getLeague()) {
-      return $scope.getLeague().userRoles.indexOf("Admin") > -1;
+      return hasRole($scope.getLeague(), "Admin");
     }
   };
 
   $scope.isReferee = function() {
     if ($scope.getLeague()) {
-      return $scope.getLeague().userRoles.indexOf("Referee") > -1;
+      return hasRole($scope.getLeague(), "Referee");
     }
   };
   
@@ -98,13 +98,23 @@ require('angular').module('etherLeagueApp').controller('leagueDetailsCtrl', ['$s
     return leagueDetails.participantNames[index];
   };
 
+  var hasRole = function(leagueId, role) {
+    return !leagueId.userRoles.every((aRole) => {return aRole != role});
+  }
+
   var init = function() {
-    leagueAggregateService.getLeagueDetails($routeParams.leagueId, true)
-    .then(function(league) {
-      $timeout(function() {
-        $scope.leagues.push(league);
-      });
-    }).then(function() {return $routeParams.leagueId})
+    var leagueId = $routeParams.leagueId;
+
+    leagueAggregateService.getRolesForLeague(leagueId)
+      .then((roles) => {
+        return leagueAggregateService.getLeagueDetails(leagueId, roles);
+      })
+      .then(function(league) {
+        $timeout(function() {
+          $scope.leagues.push(league);
+        });
+        return leagueId;
+      })
       .then(resultAggregateService.getMyPendingResults)
       .then(function(pendingResults){
         $timeout(function() {

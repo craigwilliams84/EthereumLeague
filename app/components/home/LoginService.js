@@ -5,7 +5,7 @@ require('angular').module('EtherLeagueServices').service('loginService', [functi
       if(typeof web3 !== 'undefined') {
         console.log("Metamask or equivalent found");
         web3 = new Web3(web3.currentProvider);
-        resolve();
+        resolve(web3.eth.accounts);
       } else {
         reject("Web3 has not been injected");
       }
@@ -30,9 +30,9 @@ require('angular').module('EtherLeagueServices').service('loginService', [functi
           callback(null, pw);
         };
 
+        //TODO need to obtain host via config
         var provider = new HookedWeb3Provider({
-          // Let's pick the one that came with Truffle
-          host: web3.currentProvider.host,
+          host: "http://localhost:8545",
           transaction_signer: ks
         });
 
@@ -41,7 +41,7 @@ require('angular').module('EtherLeagueServices').service('loginService', [functi
         // Generate the first address out of the seed
         ks.generateNewAddress(pwDerivedKey);
 
-        resolve();
+        resolve(ks.getAddresses());
       });
     });
   };

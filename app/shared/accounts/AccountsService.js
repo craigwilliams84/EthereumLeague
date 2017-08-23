@@ -21,8 +21,8 @@ require('angular').module('EtherLeagueServices').service('accountsService', [fun
 
   this.login = function(loginStrategy) {
     return loginStrategy()
-      .then(function() {
-        accounts = web3.eth.accounts;
+      .then(function(loggedInAccounts) {
+        accounts = loggedInAccounts;
         console.log("Your account is " + accounts[0]);
 
         LeagueAggregate.setProvider(web3.currentProvider);
