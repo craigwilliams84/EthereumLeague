@@ -8,6 +8,7 @@ const PARTICIPANT= "Participant";
 const STATUSES={0: "AWAITING PARTICIPANTS", 1: "IN PROGRESS", 2: "COMPLETED"};
 
 require('angular').module('EtherLeagueServices').service('leagueAggregateService', ['accountsService', function(accountsService) {
+  const thisService = this;
 
   this.addLeague = function(name, pointsForWin, pointsForDraw, entryFeeEther, numOfEntrants, timesToPlay) {
     return getLeagueAggregate()
@@ -113,6 +114,55 @@ require('angular').module('EtherLeagueServices').service('leagueAggregateService
       });
   };
 
+  thisService.getLeagueDetails = function(id, ...userRoles) {
+    return getLeagueAggregate()
+      .then(function(leagueAgg) {
+        return leagueAgg.getLeagueDetails.call(id.valueOf()).then(function(leagueDetails) {
+          var leagueDetails = {
+            'id': id.toString(),
+            name: web3.toAscii(leagueDetails[0]),
+            participantIds: leagueDetails[1],
+            participantNames: toAsciiArray(leagueDetails[2]),
+            participantScores: leagueDetails[3],
+            entryFee: leagueDetails[4],
+            entryFeeForDisplay: web3.fromWei(leagueDetails[4], "ether").toString(),
+            prizeForDisplay: web3.fromWei(leagueDetails[4] * leagueDetails[1].length, "ether").toString(),
+            status: getStatus(leagueDetails[5]),
+            userRoles: userRoles
+          };
+
+          addSortedEntriesToLeagueDetails(leagueDetails);
+          return leagueDetails;
+        });
+      });
+  };
+
+  thisService.getRolesForLeague = function(leagueId) {
+    var roles = [];
+
+    var addToRolesIfIdExists = function(id, ids, role) {
+      if (ids.length > 0 && ids.every((anId) => {return !anId.toString() == id.toString()})) {
+        roles.push(role);
+      }
+    };
+
+    return this.getAdminLeagueIds()
+      .then(function(leagueIds) {
+        addToRolesIfIdExists(leagueId, leagueIds, ADMIN);
+      })
+      .then(this.getParticipantLeagueIds)
+      .then(function(leagueIds) {
+        addToRolesIfIdExists(leagueId, leagueIds, PARTICIPANT);
+      })
+      .then(this.getRefereeLeagueIds)
+      .then(function(leagueIds) {
+        addToRolesIfIdExists(leagueId, leagueIds, REFEREE);
+      })
+      .then(function() {
+        return roles;
+      });
+  };
+
   var getLeagueIdsFromEvent = function(event) {
     return getIdsFromEvent(event, "leagueId");
   };
@@ -153,37 +203,11 @@ require('angular').module('EtherLeagueServices').service('leagueAggregateService
     });
   };
 
-  var getLeagueDetails = function(id, ...userRoles) {
-    return getLeagueAggregate()
-      .then(function(leagueAgg) {
-        return leagueAgg.getLeagueDetails.call(id.valueOf()).then(function(leagueDetails) {
-          var leagueDetails = {
-            'id': id.toString(),
-            name: web3.toAscii(leagueDetails[0]),
-            participantIds: leagueDetails[1],
-            participantNames: toAsciiArray(leagueDetails[2]),
-            participantScores: leagueDetails[3],
-            entryFee: leagueDetails[4],
-            entryFeeForDisplay: web3.fromWei(leagueDetails[4], "ether").toString(),
-            prizeForDisplay: web3.fromWei(leagueDetails[4] * leagueDetails[1].length, "ether").toString(),
-            status: getStatus(leagueDetails[5]),
-            userRoles: userRoles
-          };
-
-          addSortedEntriesToLeagueDetails(leagueDetails);
-          return leagueDetails;
-        });
-      });
-  };
-
-  //TODO need to sort this
-  this.getLeagueDetails = getLeagueDetails;
-
   var getLeagueDetailsForIds = function(leagueIds, role) {
     var leagues = [];
     var promises = [];
     leagueIds.forEach(function(id) {
-      var promise = getLeagueDetails(id, role)
+      var promise = thisService.getLeagueDetails(id, role)
         .then(function(leagueDetails) {
           leagues.push(leagueDetails);
         });

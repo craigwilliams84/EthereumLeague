@@ -1,5 +1,5 @@
-require('../js/appConfig');
-require('../js/services/ResultAggregateService');
+require('appConfig');
+require('./ResultAggregateService');
 require('angular-mocks/ngMock');
 
 describe('ResultAggregateService', function() {

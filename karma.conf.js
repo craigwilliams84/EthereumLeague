@@ -13,16 +13,16 @@ module.exports = function(config) {
     frameworks: ['browserify', 'jasmine'],
 
     files: [
-      'app/js/app.js',
-      'app/test/*.js'
+      'app/components/app.js',
+      'app/**/*.spec.js'
     ],
 
     exclude: [
     ],
 
     preprocessors: {
-      'app/js/app.js' : ['browserify'],
-      'app/test/*.js': ['browserify']
+      'app/components/app.js' : ['browserify'],
+      'app/**/*.spec.js': ['browserify']
     },
 
     // test results reporter to use
@@ -32,7 +32,7 @@ module.exports = function(config) {
 
     browserify: {
       debug: true,
-      paths: ['./app/js/controllers', './app/js/services'],
+      paths: ['./app/components/', './app/shared/'],
       transform: [
         istanbul({
           ignore: ['**/node_modules/**']
