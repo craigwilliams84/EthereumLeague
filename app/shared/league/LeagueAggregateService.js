@@ -74,8 +74,10 @@ require('angular').module('EtherLeagueServices').service('leagueAggregateService
   this.getAdminLeagueIds = function() {
     return getLeagueAggregate()
       .then(function(leagueAgg) {
-        return leagueAgg.getLeaguesForAdmin.call("0x" + accountsService.getMainAccount(), {from: accountsService.getMainAccount()})
-      });
+        return leagueAgg.OnLeagueAdded({adminAddress: "0x" + accountsService.getMainAccount()},
+          {fromBlock: 0, toBlock: web3.eth.getBlockNumber()});
+      })
+      .then(getLeagueIdsFromEvent);
   };
 
   this.getParticipantIdsInLeagueForUser = function(leagueId) {

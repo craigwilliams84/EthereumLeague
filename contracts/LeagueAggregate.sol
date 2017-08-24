@@ -56,7 +56,7 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
         leagues[id].timesToPlayEachParticipant = timesToPlayEachParticipant;
         leagues[id].adminAddress = msg.sender;
 
-        OnLeagueAdded(id);
+        OnLeagueAdded(id, msg.sender);
     }
 
     function addRefereeToLeague(uint leagueId, address refereeAddress) onlyAdmin(leagueId) {
@@ -161,33 +161,6 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
         }
     }
 
-    function getLeaguesForAdmin(address adminAddress) constant returns (uint[]) {
-
-        //Push not available for memory arrays so we need to keep a count
-        uint foundLeagueCount;
-
-        for(uint i = 0; i < leagues.length; i++) {
-            if (leagues[i].adminAddress == adminAddress) {
-                foundLeagueCount++;
-            }
-        }
-
-        //Memory arrays can't be dynamic...Is there a better way to do this rather than iterating twice??
-        uint[] memory leagueIds = new uint[](foundLeagueCount);
-
-        foundLeagueCount = 0;
-
-        //Can't use i again here
-        for(uint x = 0; x < leagues.length; x++) {
-            if (leagues[x].adminAddress == adminAddress) {
-                leagueIds[foundLeagueCount] = leagues[x].id;
-                foundLeagueCount++;
-            }
-        }
-
-        return leagueIds;
-    }
-
     function getLeagueDetails(uint leagueId) constant returns (bytes32 name, uint[] participantIds, bytes32[] participantNames, uint16[] participantScores, uint entryFee, LeagueStatus status, uint8 numOfEntrants, uint8 timesToPlayEachParticpiant) {
 
         League league = leagues[leagueId];
@@ -287,7 +260,7 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
         _;
     }
 
-    event OnLeagueAdded(uint indexed id);
+    event OnLeagueAdded(uint indexed leagueId, address indexed adminAddress);
 
     event OnLeagueJoined(uint indexed leagueId, uint indexed participantId, address indexed participantAddress);
 

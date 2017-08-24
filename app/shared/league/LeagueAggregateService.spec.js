@@ -134,6 +134,14 @@ describe('LeagueAggregateService', function() {
         }
       };
 
+      mockLeagueAggregate.OnLeagueAdded = jasmine.createSpy().and.returnValue(
+        {
+          get: (callback) => {
+            callback(undefined, [{args: {leagueId: 1}}, {args: {leagueId: 2}}]);
+          }
+        }
+      );
+
       mockLeagueAggregate.OnLeagueJoined = jasmine.createSpy().and.returnValue(
         {
           get: (callback) => {
@@ -151,16 +159,20 @@ describe('LeagueAggregateService', function() {
       );
     });
 
-    it('delegates to league aggregate getLeaguesForAdmin for admin league ids', function(done) {
+    it('obtains ids for admin leagues from OnLeagueAdded events', function(done) {
       service.getMyLeagues()
         .then(function(myLeagues) {
-          expect(mockLeagueAggregate.getLeaguesForAdmin.call).toHaveBeenCalledWith("0x4d91838268f6d6D4e590e8fd2a001Cd91c32e7A4", jasmine.anything());
+          expect(mockLeagueAggregate.OnLeagueAdded).toHaveBeenCalled();
+          var args = mockLeagueAggregate.OnLeagueAdded.calls.mostRecent().args[0];
+
+          expect(args.adminAddress).toEqual("0x" + "4d91838268f6d6D4e590e8fd2a001Cd91c32e7A4");
+          checkCommonEventArgs(mockLeagueAggregate.OnLeagueAdded.calls.mostRecent().args[1]);
           done();
         })
         .catch(done.fail);
     });
 
-    it('delegates to obtains ids for referee leagues from OnRefereeAdded events', function(done) {
+    it('obtains ids for referee leagues from OnRefereeAdded events', function(done) {
       service.getMyLeagues()
         .then(function(myLeagues) {
           expect(mockLeagueAggregate.OnRefereeAdded).toHaveBeenCalled();
@@ -173,7 +185,7 @@ describe('LeagueAggregateService', function() {
         .catch(done.fail);
     });
 
-    it('delegates to obtains ids for referee leagues from OnLeagueJoined events', function(done) {
+    it('obtains ids for referee leagues from OnLeagueJoined events', function(done) {
       service.getMyLeagues()
         .then(function(myLeagues) {
           expect(mockLeagueAggregate.OnLeagueJoined).toHaveBeenCalled();
