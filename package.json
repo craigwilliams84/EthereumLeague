@@ -18,7 +18,8 @@
     "hooked-web3-provider": "^1.0.0",
     "truffle-contract": "^2.0.2",
     "ui-select": "0.19.8",
-    "web3": "^0.20.0"
+    "web3": "^0.20.0",
+    "zeppelin-solidity": "^1.2.0"
   },
   "repository": {},
   "engines": {
