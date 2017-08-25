@@ -7,8 +7,11 @@ contract Bank is Ownable, Fundable {
   address leagueContractAddress;
   mapping (address => uint) availableFunds;
 
-  function addFunds(address toAddress) external payable onlyLeagueContract {
-    availableFunds[toAddress] = availableFunds[toAddress] + msg.value;
+  function() payable {
+  }
+
+  function addAvailableFunds(address toAddress, uint amount) external onlyLeagueContract {
+    availableFunds[toAddress] = availableFunds[toAddress] + amount;
   }
 
   function withdrawFunds() external hasFunds{

@@ -10,6 +10,7 @@ require('league/LeagueAggregateService');
 require('result/ResultAggregateService');
 require('messages/MessagesService');
 require('modal/ModalService');
+require('bank/BankService');
 
 require('home/EtherLeagueController');
 require('create/CreateLeagueController');

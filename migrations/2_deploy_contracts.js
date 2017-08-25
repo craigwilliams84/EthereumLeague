@@ -1,5 +1,6 @@
 var LeagueAggregate = artifacts.require("LeagueAggregate.sol");
 var ResultAggregate = artifacts.require("ResultAggregate.sol");
+var Bank = artifacts.require("Bank.sol");
 
 module.exports = function(deployer) {
   deployer.deploy(LeagueAggregate)
@@ -8,11 +9,24 @@ module.exports = function(deployer) {
       return deployer.deploy(ResultAggregate, LeagueAggregate.address)
     })
     .then(function() {
-      console.log("ResultAggregate address: " + ResultAggregate.address);
+      return deployer.deploy(Bank);
+    })
+    .then(function() {
+      return Bank.deployed();
+    })
+    .then(function(bank) {
+      console.log("Setting league aggregate address on Bank: " + LeagueAggregate.address);
+      return bank.setLeagueContractAddress(LeagueAggregate.address);
+    })
+    .then(function() {
       return LeagueAggregate.deployed();
     })
     .then(function(leagueAggregate) {
-      console.log("Setting LeagueAggregate address on ResultAggregate");
-      return leagueAggregate.setResultAggregateAddress(ResultAggregate.address);
+      console.log("Setting result aggregate address on LeagueAggregate: " + ResultAggregate.address);
+      return leagueAggregate.setResultAggregateAddress(ResultAggregate.address)
+        .then(function() {
+          console.log("Setting Bank address on LeagueAggregate: " + Bank.address);
+          return leagueAggregate.setBankAddress(Bank.address)
+        });
     })
 };

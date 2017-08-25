@@ -29,6 +29,7 @@ describe('AccountsService', function() {
       web3.currentProvider = {id: "mockProvider"};
       LeagueAggregate = {setProvider: jasmine.createSpy('setProvider')};
       ResultAggregate = {setProvider: jasmine.createSpy('setProvider')};
+      Bank = {setProvider: jasmine.createSpy('setProvider')};
     });
 
     it('executes login strategy', function(done) {
@@ -54,6 +55,7 @@ describe('AccountsService', function() {
         .then(function() {
           expect(LeagueAggregate.setProvider).toHaveBeenCalledWith(web3.currentProvider);
           expect(ResultAggregate.setProvider).toHaveBeenCalledWith(web3.currentProvider);
+          expect(Bank.setProvider).toHaveBeenCalledWith(web3.currentProvider);
           done();
         })
         .catch(done.fail);

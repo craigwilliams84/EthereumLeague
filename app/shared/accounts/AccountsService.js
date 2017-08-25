@@ -27,6 +27,7 @@ require('angular').module('EtherLeagueServices').service('accountsService', [fun
 
         LeagueAggregate.setProvider(web3.currentProvider);
         ResultAggregate.setProvider(web3.currentProvider);
+        Bank.setProvider(web3.currentProvider);
       });
   };
 

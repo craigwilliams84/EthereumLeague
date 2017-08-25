@@ -27,9 +27,9 @@ contract('Bank', function(accounts) {
 			});
 	}));
 
-	it("should add funds when called from league contract", redeploy(accounts[0], function(done, bank){
+	it("should add available funds when called from league contract", redeploy(accounts[0], function(done, bank){
 
-		addFunds(bank)
+		addAvailableFunds(bank)
 			.then(function() {
 				return bank.getAvailableFunds.call({from: accounts[2]});
 			})
@@ -42,9 +42,9 @@ contract('Bank', function(accounts) {
 			});
 	}));
 
-	it("should not allow addFunds to be called from non league contract", redeploy(accounts[0], function(done, bank){
+	it("should not allow available funds to be to be added from non league contract", redeploy(accounts[0], function(done, bank){
 
-		addFunds(bank, accounts[3])
+		addAvailableFunds(bank, accounts[3])
 			.then(function() {
 				done("Add funds called from non league contract");
 			})
@@ -56,59 +56,67 @@ contract('Bank', function(accounts) {
 
 	it("should allow funds to be withdrawn", redeploy(accounts[0], function(done, bank){
 
-		addFunds(bank)
-			.then(function() {
-				var fundsBefore= web3.eth.getBalance(accounts[2]);
-				return bank.withdrawFunds({from: accounts[2], gas: 3000000, gasPrice: 1})
-					.then(function(result) {
-						var fundsAfter = web3.eth.getBalance(accounts[2]);
-						var gasUsed = result.receipt.gasUsed;
-						assert.equal(fundsAfter.toString(), fundsBefore.plus(FUNDS_TO_ADD - gasUsed).toString(), "Funds not transferred correctly");
-						done();
-					})
-			})
-			.catch(function(err) {
-				done(err);
-			});
+		//Send ether to the bank fallback so enough funds are available to withdraw
+		web3.eth.sendTransaction({from: accounts[0], to: bank.address, value: 999999999999999}, function() {
+			addAvailableFunds(bank)
+				.then(function() {
+					var fundsBefore = web3.eth.getBalance(accounts[2]);
+					return bank.withdrawFunds({from: accounts[2], gas: 3000000, gasPrice: 1})
+						.then(function(result) {
+							var fundsAfter = web3.eth.getBalance(accounts[2]);
+							var gasUsed = result.receipt.gasUsed;
+							assert.equal(fundsAfter.toString(), fundsBefore.plus(FUNDS_TO_ADD - gasUsed).toString(), "Funds not transferred correctly");
+							done();
+						})
+				})
+				.catch(function(err) {
+					done(err);
+				});
+		});
 	}));
 
 	it("should zero available funds after withdrawal", redeploy(accounts[0], function(done, bank){
 
-		addFunds(bank)
-			.then(function() {
-				return bank.withdrawFunds({from: accounts[2], gas: 3000000, gasPrice: 1})
-			})
-			.then(function() {
-				return bank.getAvailableFunds.call({from: accounts[2]});
-			})
-			.then(function(availableFunds) {
-				assert(availableFunds, 0);
-				done();
-			})
-			.catch(function(err) {
-				done(err);
-			});
+		//Send ether to the bank fallback so enough funds are available to withdraw
+		web3.eth.sendTransaction({from: accounts[0], to: bank.address, value: 999999999999999}, function() {
+			addAvailableFunds(bank)
+				.then(function() {
+					return bank.withdrawFunds({from: accounts[2], gas: 3000000, gasPrice: 1})
+				})
+				.then(function() {
+					return bank.getAvailableFunds.call({from: accounts[2]});
+				})
+				.then(function(availableFunds) {
+					assert(availableFunds, 0);
+					done();
+				})
+				.catch(function(err) {
+					done(err);
+				});
+		})
 	}));
 
 	it("should throw if withdrawFunds is called when no funds are available", redeploy(accounts[0], function(done, bank){
 
-		bank.withdrawFunds({from: accounts[2], gas: 3000000, gasPrice: 1})
-			.then(function() {
-				done("An error was expected when calling withdrawFunds without a balance");
-			})
-			.catch(function(err) {
-				//Error expected
-				done();
-			});
+		web3.eth.sendTransaction({from: accounts[0], to: bank.address, value: 999999999999999}, function() {
+			bank.withdrawFunds({from: accounts[2], gas: 3000000, gasPrice: 1})
+				.then(function() {
+					done("An error was expected when calling withdrawFunds without a balance");
+				})
+				.catch(function(err) {
+					//Error expected
+					done();
+				});
+		});
 	}));
 
-	var addFunds = function(bank, fromAccount) {
+	var addAvailableFunds = function(bank, fromAccount) {
 		if (!fromAccount) {
 			fromAccount = accounts[1];
 		}
 		return bank.setLeagueContractAddress(accounts[1], {from: accounts[0], gas: 3000000})
 			.then(function() {
-				return bank.addFunds(accounts[2], {value: FUNDS_TO_ADD, from: fromAccount, gas: 3000000});
+				return bank.addAvailableFunds(accounts[2], FUNDS_TO_ADD, {from: fromAccount, gas: 3000000});
 			})
 	};
 
@@ -117,7 +125,7 @@ contract('Bank', function(accounts) {
 function redeploy(deployer, testFunction) {
 
 	var wrappedFunction = function(done) {
-		Bank.new({ from: deployer }).then(function (newBank) {
+		Bank.new({ from: deployer, gas: 3000000}).then(function (newBank) {
 			testFunction(done, newBank);
     	});
 	}

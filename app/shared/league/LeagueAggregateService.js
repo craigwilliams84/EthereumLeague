@@ -41,16 +41,6 @@ require('angular').module('EtherLeagueServices').service('leagueAggregateService
       })
   };
 
-  this.withdrawFunds = function() {
-    return getLeagueAggregate()
-      .then(function(leagueAgg) {
-        return leagueAgg.withdrawFunds({
-          from: accountsService.getMainAccount(),
-          gas: 3000000
-        });
-      })
-  };
-
   this.getMyLeagues = function() {
     var myLeagues = [];
     return this.getAdminLeagueIds()
@@ -107,13 +97,6 @@ require('angular').module('EtherLeagueServices').service('leagueAggregateService
                                         {fromBlock: 0, toBlock: web3.eth.getBlockNumber()});
       })
       .then(getLeagueIdsFromEvent);
-  };
-
-  this.getAvailableFunds = function() {
-    return getLeagueAggregate()
-      .then(function(leagueAgg) {
-        return leagueAgg.getAvailableFunds.call({from: accountsService.getMainAccount()});
-      });
   };
 
   thisService.getLeagueDetails = function(id, ...userRoles) {

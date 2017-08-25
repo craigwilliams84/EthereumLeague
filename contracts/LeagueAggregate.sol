@@ -1,8 +1,10 @@
 pragma solidity ^0.4.11;
 
+import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./LeagueAggregateI.sol";
+import "./Fundable.sol";
 
-contract LeagueAggregate is LeagueAggregateI {
+contract LeagueAggregate is LeagueAggregateI, Ownable {
 
     struct League {
         uint id;
@@ -28,20 +30,15 @@ contract LeagueAggregate is LeagueAggregateI {
 
 enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
 
-    address owner;
     address[] administrators;
     address resultAggregateAddress;
+    Fundable bankContract;
     //Using array rather than mapping as we want to iterate over
     //and league indexes are incremental anyway
     League[] leagues;
-    mapping (address => uint) availableFunds;
 
     uint currentLeagueId = 0;
     uint currentParticipantId = 0;
-
-    function LeagueAggregate() {
-        owner = msg.sender;
-    }
 
     function addLeague(bytes32 name,
       uint8 pointsForWin, uint8 pointsForDraw, uint entryFee, uint8 numOfEntrants, uint8 timesToPlayEachParticipant) {
@@ -72,12 +69,12 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
             //Check the entry fee is correct
             if (msg.value < leagues[leagueId].entryFee) {
                 //Too low, add funds to be withdrawn
-                availableFunds[msg.sender] = availableFunds[msg.sender] + msg.value;
+                addAvailableFunds(msg.sender, msg.value);
             } else {
 
                 if (msg.value > leagues[leagueId].entryFee) {
                     //Too high, add remainder to available funds to withdraw
-                    availableFunds[msg.sender] = availableFunds[msg.sender] + (msg.value - leagues[leagueId].entryFee);
+                    addAvailableFunds(msg.sender, msg.value - leagues[leagueId].entryFee);
                 }
 
                 uint index = leagues[leagueId].participants.length;
@@ -88,11 +85,11 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
                 leagues[leagueId].participants[index].adminAddress = msg.sender;
                 leagues[leagueId].scores[id] = 0;
 
-                OnLeagueJoined(leagueId, id, msg.sender);
-
                 if (leagues[leagueId].participants.length == leagues[leagueId].numOfEntrants) {
                     updateLeagueStatus(leagueId, LeagueStatus.IN_PROGRESS);
                 }
+                forwardFundsToBank();
+                OnLeagueJoined(leagueId, id, msg.sender);
             }
         }
     }
@@ -178,16 +175,21 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
         return(league.name, partIds, partNames, partScores, league.entryFee, league.status, league.numOfEntrants, league.timesToPlayEachParticipant);
     }
 
-    function getAvailableFunds() constant returns (uint) {
-        return availableFunds[msg.sender];
+    function setResultAggregateAddress(address resultAggAdd) onlyOwner {
+        resultAggregateAddress = resultAggAdd;
     }
 
-    function withdrawFunds() {
-        uint amount = availableFunds[msg.sender];
+    function setBankAddress(address theBankAddress) onlyOwner {
+        bankContract = Fundable(theBankAddress);
+    }
 
-        //Stop reentrant attack
-        availableFunds[msg.sender] = 0;
-        msg.sender.transfer(amount);
+    function forwardFundsToBank() private {
+        bankContract.transfer(msg.value);
+        ForwardedFunds(bankContract, msg.value);
+    }
+
+    function addAvailableFunds(address theAddress, uint amount) private{
+        bankContract.addAvailableFunds(theAddress, amount);
     }
 
     function completeLeague(uint leagueId) private {
@@ -195,7 +197,7 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
 
         //For now, winner takes all, but this could change (and the contract should take a cut also)
         //Need to cope with multiple top scores
-        availableFunds[getHighestScoreAddress(leagueId)] += leagues[leagueId].entryFee * leagues[leagueId].numOfEntrants;
+        addAvailableFunds(getHighestScoreAddress(leagueId), leagues[leagueId].entryFee * leagues[leagueId].numOfEntrants);
     }
 
     //TODO Cope with multiple top scores
@@ -228,17 +230,6 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
         return currentParticipantId++;
     }
 
-    function setResultAggregateAddress(address resultAggAdd) onlyOwner {
-        resultAggregateAddress = resultAggAdd;
-    }
-
-    modifier onlyOwner () {
-        if (msg.sender != owner) {
-            throw;
-        }
-        _;
-    }
-
     modifier onlyAdmin (uint leagueId) {
         if (leagues[leagueId].adminAddress != msg.sender) {
             throw;
@@ -265,6 +256,8 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
     event OnLeagueJoined(uint indexed leagueId, uint indexed participantId, address indexed participantAddress);
 
     event OnRefereeAdded(uint indexed leagueId, address indexed refereeAddress);
+
+    event ForwardedFunds(address bankAddress, uint amount);
 
     function killMe() {
         if (msg.sender == owner) {

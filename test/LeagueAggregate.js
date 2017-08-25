@@ -1,4 +1,5 @@
 var LeagueAggregate = artifacts.require("LeagueAggregate.sol");
+var MockFundable = artifacts.require("MockFundable.sol");
 
 contract('LeagueAggregate', function(accounts) {
   
@@ -65,7 +66,23 @@ contract('LeagueAggregate', function(accounts) {
 			});
   }));
 
-	it("should be able to join a league and get refunded the excess when sending too much ether", redeploy(accounts[0], function(done, leagueAgg){
+	it("should send entry fee to bank contract", redeploy(accounts[0], function(done, leagueAgg, mockFundable){
+		var participantName =  "Tottenham Hotspur";
+
+		addLeague(leagueAgg)
+			.then(function(leagueId) {
+				return leagueAgg.joinLeague(leagueId, fromAscii(participantName), {from: accounts[1], gas: 3000000, value: 1000000});
+			})
+			.then(function() {
+				assert.equal(web3.eth.getBalance(mockFundable.address), 1000000);
+				done();
+			})
+			.catch(function(err) {
+				done(err);
+			});
+	}));
+
+	it("should be able to join a league and get refunded the excess when sending too much ether", redeploy(accounts[0], function(done, leagueAgg, mockFundable){
 		var participantName =  "Tottenham Hotspur";
 
 		addLeague(leagueAgg)
@@ -79,10 +96,11 @@ contract('LeagueAggregate', function(accounts) {
 				assert.equal(doesExist, true, "Participant has not been added to the league");
 			})
 			.then(function() {
-				return leagueAgg.getAvailableFunds.call({from: accounts[1]});
+				return mockFundable.getAddAvailableFundsCalledArguments.call({from: accounts[1]});
 			})
-			.then(function(availableFunds) {
-				assert.equal(availableFunds, 300000, "Excess funds not available to withdraw");
+			.then(function(availableFundsArgs) {
+				assert.equal(availableFundsArgs[0], accounts[1], "Excess funds not available to withdraw in fundable contract - Incorrect address");
+				assert.equal(availableFundsArgs[1], 300000, "Excess funds not available to withdraw in fundable contract - Incorrect amount");
 				done();
 			})
 			.catch(function(err) {
@@ -269,13 +287,14 @@ contract('LeagueAggregate', function(accounts) {
 			})
 	}));
 
-	it("should add withdrawable funds for league winner ", redeploy(accounts[0], function(done, leagueAgg){
+	it("should add withdrawable funds to bank contract for league winner ", redeploy(accounts[0], function(done, leagueAgg, mockFundable){
 		completeLeague(leagueAgg)
 			.then(function() {
-				return leagueAgg.getAvailableFunds.call({from: accounts[1]});
+				return mockFundable.getAddAvailableFundsCalledArguments.call({from: accounts[1]});
 			})
-			.then(function(availableFunds) {
-				assert.equal(availableFunds, 2000000, "League winner funds not correct");
+			.then(function(availableFundsArgs) {
+				assert.equal(availableFundsArgs[0], accounts[1], "League winner address not correct");
+				assert.equal(availableFundsArgs[1], 2000000, "League winner funds not correct");
 				done();
 			})
 			.catch(function(err) {
@@ -283,52 +302,19 @@ contract('LeagueAggregate', function(accounts) {
 			})
 	}));
 
-	it("should not add withdrawable funds for league loser", redeploy(accounts[0], function(done, leagueAgg){
+	it("should not add withdrawable funds for league loser", redeploy(accounts[0], function(done, leagueAgg, mockFundable){
 		completeLeague(leagueAgg)
 			.then(function() {
-				return leagueAgg.getAvailableFunds.call({from: accounts[2]});
+				return mockFundable.getAddAvailableFundsCalledArguments.call({from: accounts[2]});
 			})
-			.then(function(availableFunds) {
-				assert.equal(availableFunds, 0, "League loser funds not correct");
+			.then(function(availableFundsArgs) {
+				assert.equal(availableFundsArgs[2], 1, "Funds added for multiple participants");
+				assert.equal(availableFundsArgs[0], accounts[1], "League winner address not correct");
 				done();
 			})
 			.catch(function(err) {
 				done(err);
 			})
-	}));
-
-	it("should allow league winner to withdraw funds ", redeploy(accounts[0], function(done, leagueAgg){
-		completeLeague(leagueAgg)
-			.then(function() {
-				var fundsBefore= web3.eth.getBalance(accounts[1]);
-				return leagueAgg.withdrawFunds({from: accounts[1], gas: 3000000, gasPrice: 1})
-					.then(function(result) {
-						var fundsAfter= web3.eth.getBalance(accounts[1]);
-						var gasUsed = result.receipt.gasUsed;
-						assert.equal(fundsAfter.toString(), fundsBefore.plus(2000000 - gasUsed).toString(), "League winner funds transferred correctly");
-						done();
-					});
-			})
-			.catch(function(err) {
-				done(err);
-			});
-	}));
-
-	it("should empty available funds after withdrawal ", redeploy(accounts[0], function(done, leagueAgg){
-		completeLeague(leagueAgg)
-			.then(function() {
-				return leagueAgg.withdrawFunds({from: accounts[1], gas: 3000000, gasPrice: 1})
-			})
-			.then(function() {
-				return leagueAgg.getAvailableFunds.call({from: accounts[1]});
-			})
-			.then(function(availableFunds) {
-				assert.equal(availableFunds, 0, "League winner funds not emptied after withdrawal");
-				done();
-			})
-			.catch(function(err) {
-				done(err);
-			});
 	}));
   
   it("should be able to retrieve a leagues details", redeploy(accounts[0], function(done, leagueAgg){
@@ -428,10 +414,17 @@ contract('LeagueAggregate', function(accounts) {
 function redeploy(deployer, testFunction) {
 
 	var wrappedFunction = function(done) {
-		LeagueAggregate.new({ from: deployer }).then(function (newLeagueAggregate) {
-			testFunction(done, newLeagueAggregate);
-    	});
-	}
+		MockFundable.new({ from: deployer })
+			.then(function(mockFundable) {
+				return LeagueAggregate.new({ from: deployer })
+					.then(function(newLeagueAggregate) {
+						return newLeagueAggregate.setBankAddress(mockFundable.address, {from: deployer, gas: 3000000})
+							.then(function() {
+								testFunction(done, newLeagueAggregate, mockFundable);
+							});
+					});
+			});
+	};
 	
 	return wrappedFunction;
 }

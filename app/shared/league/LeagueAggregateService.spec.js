@@ -92,22 +92,6 @@ describe('LeagueAggregateService', function() {
     });
   });
 
-  describe('withdrawFunds', function() {
-
-    beforeEach(function() {
-      mockLeagueAggregate.withdrawFunds = jasmine.createSpy();
-    });
-
-    it('delegates to league aggregate with correct values', function(done) {
-      service.withdrawFunds()
-        .then(function() {
-          expect(mockLeagueAggregate.withdrawFunds).toHaveBeenCalledWith(jasmine.anything());
-          done();
-        })
-        .catch(done.fail);
-    });
-  });
-
   describe('getMyLeagues', function() {
 
     beforeEach(function() {
@@ -259,31 +243,6 @@ describe('LeagueAggregateService', function() {
       service.getParticipantIdsInLeagueForUser(123)
         .then(function(participantIds) {
           expect(participantIds).toEqual(['11', '16']);
-          done();
-        })
-        .catch(done.fail);
-    });
-  });
-
-  describe('getAvailableFunds', function() {
-
-    beforeEach(function() {
-      mockLeagueAggregate.getAvailableFunds = {call: jasmine.createSpy().and.returnValue(5000)};
-    });
-
-    it('delegates to league aggregate with correct values', function(done) {
-      service.getAvailableFunds()
-        .then(function() {
-          expect(mockLeagueAggregate.getAvailableFunds.call).toHaveBeenCalledWith({from: "4d91838268f6d6D4e590e8fd2a001Cd91c32e7A4"});
-          done();
-        })
-        .catch(done.fail);
-    });
-
-    it('delegates to league aggregate with correct values', function(done) {
-      service.getAvailableFunds()
-        .then(function() {
-          expect(mockLeagueAggregate.getAvailableFunds.call).toHaveBeenCalledWith({from: "4d91838268f6d6D4e590e8fd2a001Cd91c32e7A4"});
           done();
         })
         .catch(done.fail);

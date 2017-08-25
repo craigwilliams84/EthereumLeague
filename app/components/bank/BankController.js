@@ -1,11 +1,11 @@
-require('angular').module('etherLeagueApp').controller('bankCtrl', ['$scope', '$timeout', 'leagueAggregateService', 'messagesService', function($scope, $timeout, leagueAggregateService, messagesService) {
+require('angular').module('etherLeagueApp').controller('bankCtrl', ['$scope', '$timeout', 'bankService', 'messagesService', function($scope, $timeout, bankService, messagesService) {
 
   $scope.messagesService = messagesService;
   $scope.availableFunds = 0;
 
   $scope.withdrawFunds = function() {
     messagesService.setInfoMessage("Funds withdrawal transaction sent....");
-    leagueAggregateService.withdrawFunds()
+    bankService.withdrawFunds()
       .then(function() {
         messagesService.setSuccessMessage("Funds withdrawn successfully");
         init();
@@ -17,10 +17,9 @@ require('angular').module('etherLeagueApp').controller('bankCtrl', ['$scope', '$
   };
 
   var init = function() {
-    leagueAggregateService.getAvailableFunds()
+    bankService.getAvailableFunds()
       .then(function(funds) {
         $timeout(function() {
-          console.log("Funds:" + funds);
           $scope.availableFunds = web3.fromWei(funds, "ether");
         });
       })
