@@ -3,6 +3,13 @@ pragma solidity ^0.4.11;
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 import './Fundable.sol';
 
+/**
+ * A bank contract for the Leagr application that receives all the funds collected from via
+ * particpants joining a league within the League Contract.
+ *
+ * Funds can be unlocked for withdrawal for a particular address by calling the addAvailableFunds
+ * function.  (This can only be triggered from the League Contract, usually when a league has completed).
+ */
 contract Bank is Ownable, Fundable {
   address leagueContractAddress;
   mapping (address => uint) availableFunds;

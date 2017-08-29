@@ -4,6 +4,12 @@ import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./LeagueAggregateI.sol";
 import "./Fundable.sol";
 
+/**
+ * The contract for managing league operations (adding, joining, adding referees, adding
+ * confirmed results and league completion/payout).
+ *
+ * Results can be added only via the Result Contract.
+ */
 contract LeagueAggregate is LeagueAggregateI, Ownable {
 
     struct League {

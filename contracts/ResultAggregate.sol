@@ -2,6 +2,16 @@ pragma solidity ^0.4.11;
 
 import "./LeagueAggregateI.sol";
 
+/**
+ * Contract for managing results in the Leagr application, upto result acceptance.
+ *
+ * Results can be added by referees, and accepted by the involved participants.
+ *
+ * Once a result moves into the accepted status, the contract triggers the league contract
+ * in order to update the current league scores.
+ *
+ * TODO Dispute resolution is not yet implemented.
+ */
 contract ResultAggregate {
     address owner;
     address[] administrators;
