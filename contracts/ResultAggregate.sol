@@ -41,11 +41,13 @@ contract ResultAggregate {
                 numResults++;
             }
         }
-        
+
         uint[] memory resultIds = new uint[](numResults);
         uint counter = 0;
         
         for (uint n = 0; n < results[leagueId].length; n++) {
+            //It feels weird checking this twice but should be cheaper on gas
+            //compared to storing the pending status id's in the previous loop
             if (results[leagueId][n].status == status) {
                 resultIds[counter] = results[leagueId][n].id;
                 counter++;
