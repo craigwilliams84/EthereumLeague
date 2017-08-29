@@ -52,6 +52,7 @@ contract ResultAggregate {
             }
         }
 
+        //TODO Look into changing the data structure to avoid this double loop.  Compare gas cost.
         uint[] memory resultIds = new uint[](numResults);
         uint counter = 0;
         
