@@ -38,3 +38,18 @@ truffle migrate
 ```
 gulp serve
 ```
+
+## To test
+### Javascript
+Javascript unit tests are written in jasmine and can be executed by running
+```
+gulp test
+```
+
+### Solidity
+The solidity smart contract tests can be executed by running
+```
+truffle test
+```
+
+Note, that testrpc must be running in order for these tests to run.
