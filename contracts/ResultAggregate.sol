@@ -1,5 +1,6 @@
 pragma solidity ^0.4.11;
 
+import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./LeagueAggregateI.sol";
 
 /**
@@ -12,8 +13,7 @@ import "./LeagueAggregateI.sol";
  *
  * TODO Dispute resolution is not yet implemented.
  */
-contract ResultAggregate {
-    address owner;
+contract ResultAggregate is Ownable {
     address[] administrators;
     mapping (uint => Result[]) results;
     LeagueAggregateI leagueAggregate;
@@ -25,7 +25,7 @@ contract ResultAggregate {
     }
     
     function addResult(uint leagueId, uint homeParticipantId, 
-        uint16 homeScore, uint awayParticipantId, uint16 awayScore) onlyReferee(leagueId) {
+        uint16 homeScore, uint awayParticipantId, uint16 awayScore) external onlyReferee(leagueId) {
         
         uint id = getNewResultId(leagueId);
         results[leagueId].length++;
@@ -76,7 +76,7 @@ contract ResultAggregate {
     }
     
     function acceptResult(uint leagueId, uint resultId) 
-        onlyParticipant(leagueId, resultId) hasNotActed(leagueId, resultId) atStatus(leagueId, resultId, ResultStatus.PENDING) {
+        onlyParticipant(leagueId, resultId) external hasNotActed(leagueId, resultId) atStatus(leagueId, resultId, ResultStatus.PENDING) {
         
         if (results[leagueId][resultId].acted != 0 
         	&& results[leagueId][resultId].acted != msg.sender) {
@@ -87,7 +87,7 @@ contract ResultAggregate {
     }
     
     function disputeResult(uint leagueId, uint resultId) 
-        onlyParticipant(leagueId, resultId) hasNotActed(leagueId, resultId) atStatus(leagueId, resultId, ResultStatus.PENDING){
+        onlyParticipant(leagueId, resultId) hasNotActed(leagueId, resultId) atStatus(leagueId, resultId, ResultStatus.PENDING) external {
         
     }
     
@@ -103,13 +103,6 @@ contract ResultAggregate {
     
     function getNewResultId(uint leagueId) private returns (uint id) {
         return results[leagueId].length;
-    }
-
-    modifier onlyOwner (string name) {
-        if (msg.sender != owner) {
-            throw;
-        }
-        _;
     }
     
     modifier onlyReferee (uint leagueId) {

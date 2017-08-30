@@ -47,7 +47,7 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
     uint currentParticipantId = 0;
 
     function addLeague(bytes32 name,
-      uint8 pointsForWin, uint8 pointsForDraw, uint entryFee, uint8 numOfEntrants, uint8 timesToPlayEachParticipant) {
+      uint8 pointsForWin, uint8 pointsForDraw, uint entryFee, uint8 numOfEntrants, uint8 timesToPlayEachParticipant) external {
         uint id = getNewLeagueId();
         leagues.length = leagues.length + 1;
         leagues[id].id = id;
@@ -62,12 +62,12 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
         OnLeagueAdded(id, msg.sender);
     }
 
-    function addRefereeToLeague(uint leagueId, address refereeAddress) onlyAdmin(leagueId) {
+    function addRefereeToLeague(uint leagueId, address refereeAddress) external onlyAdmin(leagueId) {
         leagues[leagueId].referees.push(refereeAddress);
         OnRefereeAdded(leagueId, refereeAddress);
     }
 
-    function joinLeague(uint leagueId, bytes32 participantName) payable onlyWithStatus(leagueId, LeagueStatus.AWAITING_PARTICIPANTS) {
+    function joinLeague(uint leagueId, bytes32 participantName) external payable onlyWithStatus(leagueId, LeagueStatus.AWAITING_PARTICIPANTS) {
         //Check team doesn't exist
         if (doesLeagueContainParticipant(leagueId, participantName)) {
             throw;
@@ -142,7 +142,7 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
     }
 
     function addResult(uint leagueId, uint homeParticipantId,
-      uint16 homeParticipantScore, uint awayParticipantId, uint16 awayParticipantScore) onlyResultAggregateContract {
+      uint16 homeParticipantScore, uint awayParticipantId, uint16 awayParticipantScore) external onlyResultAggregateContract {
 
         if (homeParticipantScore > awayParticipantScore) {
             //Home win
@@ -181,11 +181,11 @@ enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
         return(league.name, partIds, partNames, partScores, league.entryFee, league.status, league.numOfEntrants, league.timesToPlayEachParticipant);
     }
 
-    function setResultAggregateAddress(address resultAggAdd) onlyOwner {
+    function setResultAggregateAddress(address resultAggAdd) external onlyOwner {
         resultAggregateAddress = resultAggAdd;
     }
 
-    function setBankAddress(address theBankAddress) onlyOwner {
+    function setBankAddress(address theBankAddress) external onlyOwner {
         bankContract = Fundable(theBankAddress);
     }
 

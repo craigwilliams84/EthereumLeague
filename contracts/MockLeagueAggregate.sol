@@ -23,7 +23,7 @@ contract MockLeagueAggregate is LeagueAggregateI {
     }
     
     function addResult(uint leagueId, uint homeParticipantId, 
-        uint16 homeParticipantScore, uint awayParticipantId, uint16 awayParticipantScore) {
+        uint16 homeParticipantScore, uint awayParticipantId, uint16 awayParticipantScore) external {
         addResultCalled = true;
     }
 

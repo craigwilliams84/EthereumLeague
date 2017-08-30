@@ -7,5 +7,5 @@ contract LeagueAggregateI {
         uint leagueId, uint participantId, address potentialParticipantAddress) constant returns (bool);
 
     function addResult(uint leagueId, uint homeParticipantId, 
-        uint16 homeParticipantScore, uint awayParticipantId, uint16 awayParticipantScore);
+        uint16 homeParticipantScore, uint awayParticipantId, uint16 awayParticipantScore) external;
 }
