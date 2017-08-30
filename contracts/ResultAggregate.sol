@@ -14,10 +14,10 @@ import "./LeagueAggregateI.sol";
  * TODO Dispute resolution is not yet implemented.
  */
 contract ResultAggregate is Ownable {
-    address[] administrators;
-    mapping (uint => Result[]) results;
-    LeagueAggregateI leagueAggregate;
-    uint currentId = 0;
+    address[] private administrators;
+    mapping (uint => Result[]) private results;
+    LeagueAggregateI private leagueAggregate;
+    uint private currentId = 0;
 
     function ResultAggregate(address leagueAggregateAddress) {
         owner = msg.sender;

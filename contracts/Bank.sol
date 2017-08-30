@@ -11,8 +11,8 @@ import './Fundable.sol';
  * function.  (This can only be triggered from the League Contract, usually when a league has completed).
  */
 contract Bank is Ownable, Fundable {
-  address leagueContractAddress;
-  mapping (address => uint) availableFunds;
+  address private leagueContractAddress;
+  mapping (address => uint) private availableFunds;
 
   function() payable {
   }

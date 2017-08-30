@@ -34,17 +34,17 @@ contract LeagueAggregate is LeagueAggregateI, Ownable {
         address adminAddress;
     }
 
-enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
+    enum LeagueStatus { AWAITING_PARTICIPANTS, IN_PROGRESS, COMPLETED }
 
-    address[] administrators;
-    address resultAggregateAddress;
-    Fundable bankContract;
+    address[] private administrators;
+    address private resultAggregateAddress;
+    Fundable private bankContract;
     //Using array rather than mapping as we want to iterate over
     //and league indexes are incremental anyway
-    League[] leagues;
+    League[] private leagues;
 
-    uint currentLeagueId = 0;
-    uint currentParticipantId = 0;
+    uint private currentLeagueId = 0;
+    uint private currentParticipantId = 0;
 
     function addLeague(bytes32 name,
       uint8 pointsForWin, uint8 pointsForDraw, uint entryFee, uint8 numOfEntrants, uint8 timesToPlayEachParticipant) external {
