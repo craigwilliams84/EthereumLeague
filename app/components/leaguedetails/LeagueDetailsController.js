@@ -3,7 +3,7 @@ require('angular').module('etherLeagueApp').controller('leagueDetailsCtrl', ['$s
   $scope.leagues = [];
   $scope.pendingResults = [];
 
-  $scope.refreshLeagues = function() {
+  $scope.reload = function() {
     $scope.leagues = [];
     $scope.pendingResults = [];
     init();
@@ -47,20 +47,11 @@ require('angular').module('etherLeagueApp').controller('leagueDetailsCtrl', ['$s
       }
     };
 
-    modalService.openModal("pendingResultModal", resolve);
-  };
-
-  $scope.acceptResult = function(resultId) {
-    messagesService.setInfoMessage("Result accept transaction sent....");
-    resultAggregateService.acceptResult($scope.getLeague().id, resultId)
+    modalService.openModal("pendingResultModal", resolve)
+      .result
       .then(function() {
-        console.log("Result accepted successfully");
-        messagesService.setSuccessMessage("Result accepted successfully");
-        $scope.refreshAll();
-      }).catch(function(e) {
-      console.error(e);
-      messagesService.setErrorMessage("There was an error when adding the result");
-    });
+        $scope.reload();
+      });
   };
 
   $scope.shouldHideLeagueHeader = function() {
