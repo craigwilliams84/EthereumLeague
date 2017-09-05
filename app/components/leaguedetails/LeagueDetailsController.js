@@ -47,11 +47,7 @@ require('angular').module('etherLeagueApp').controller('leagueDetailsCtrl', ['$s
       }
     };
 
-    modalService.openModal("pendingResultModal", resolve)
-      .result
-      .then(function() {
-        $scope.reload();
-      });
+    modalService.openModal("pendingResultModal", resolve, () => {$scope.reload()});
   };
 
   $scope.shouldHideLeagueHeader = function() {

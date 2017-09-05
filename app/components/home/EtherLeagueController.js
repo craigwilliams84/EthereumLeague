@@ -18,18 +18,6 @@ require('angular').module('etherLeagueApp').controller("etherLeagueController", 
   };
 
   $scope.refreshBalance = function() {
-    accountsService.getBalance(function(err, result) {
-      if (err) {
-        console.log(err);
-      } else {
-        $timeout(function() {
-          $scope.balance = result;
-        });
-      }
-    });
-  };
-
-  $scope.refreshBalance = function() {
     accountsService.getBalance()
       .then(function(balance) {
         $timeout(function() {

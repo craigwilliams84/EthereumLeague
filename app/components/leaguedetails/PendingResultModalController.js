@@ -1,4 +1,4 @@
-require('angular').module('etherLeagueApp').controller("pendingResultModalCtrl", ['$scope', '$timeout', '$uibModalInstance', 'resultAggregateService', 'messagesService', 'accountsService', 'leagueId', 'result', function($scope, $timeout, $uibModalInstance, resultAggregateService, messagesService, accountsService, leagueId, result) {
+require('angular').module('etherLeagueApp').controller("pendingResultModalCtrl", ['$scope', '$timeout', '$uibModalInstance', 'resultAggregateService', 'messagesService', 'accountsService', 'leagueId', 'result', 'txSuccessCallback', function($scope, $timeout, $uibModalInstance, resultAggregateService, messagesService, accountsService, leagueId, result, txSuccessCallback) {
 
   $scope.result = result;
 
@@ -12,6 +12,10 @@ require('angular').module('etherLeagueApp').controller("pendingResultModalCtrl",
       .then(function() {
         console.log("Result accepted successfully");
         messagesService.setSuccessMessage("Result accepted successfully");
+
+        if (txSuccessCallback) {
+          txSuccessCallback();
+        }
       }).catch(function(e) {
         console.error(e);
         messagesService.setErrorMessage("There was an error when adding the result");
