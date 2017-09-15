@@ -59,9 +59,9 @@ contract RefereeVote is Ownable {
 
         if (!completeVoteIfDurationExceeded()) {
             if (vote == Vote.APPROVE) {
-                refereeVoteResults[refereeAddress].approvalCount = refereeVoteResults[refereeAddress].approvalCount + 1;
+                refereeVoteResults[refereeAddress].approvalCount++;
             } else {
-                refereeVoteResults[refereeAddress].disapprovalCount = refereeVoteResults[refereeAddress].disapprovalCount + 1;
+                refereeVoteResults[refereeAddress].disapprovalCount++;
             }
 
             refereeVoteResults[refereeAddress].voters.push(msg.sender);
