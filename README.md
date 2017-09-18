@@ -12,7 +12,7 @@ A decentralized sports / esports league management application built on top of t
 
 ## TODO
 * Dispute resolution quorum
-* Referee approval quorum
+* Referee approval quorum (In Progress)
 * Better bank features (eg. History of winnings)
 
 ## To run
