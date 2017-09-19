@@ -17,6 +17,7 @@ contract RefereeVote is Ownable {
 
     VoteStatus public status = VoteStatus.PRE_VOTE;
     uint public voterCount = 0;
+    uint public endTime;
 
     address[] private refereeCandidates;
     address[] private acceptedReferees;
@@ -26,7 +27,6 @@ contract RefereeVote is Ownable {
     uint8 private durationInDays;
     uint8 private acceptancePercentage;
     uint8 private maxVoters;
-    uint private endTime;
 
     enum VoteStatus { PRE_VOTE, IN_PROGRESS, COMPLETED }
     enum Vote { APPROVE, DISAPPROVE }
@@ -48,7 +48,9 @@ contract RefereeVote is Ownable {
 
     function startVote() onlyOwner onlyAtStatus(VoteStatus.PRE_VOTE) {
         status = VoteStatus.IN_PROGRESS;
-        endTime = block.timestamp + (durationInDays * 24 * 60 * 60);
+        //86400 seconds in a day
+        endTime = block.timestamp + (durationInDays * 86400);
+        VoteStarted(endTime);
     }
 
     function addVoter(address voterAddress) external onlyOwner onlyAtStatus(VoteStatus.PRE_VOTE) {
@@ -72,6 +74,8 @@ contract RefereeVote is Ownable {
 
             refereeVoteResults[refereeAddress].voters.push(msg.sender);
         }
+
+        VoteAdded(msg.sender, refereeAddress, vote);
     }
 
     function completeVoteIfDurationExceeded() public returns (bool) {
@@ -124,11 +128,15 @@ contract RefereeVote is Ownable {
 
     //This will also fail if the address is not registered to vote as their map value will be NOT_REGISTERED
     modifier onlyRegistered() {
-        require(voters[msg.sender] == VoterParticipationStatus.REGISTERED);
+        assert(voters[msg.sender] == VoterParticipationStatus.REGISTERED);
         _;
     }
 
     event CandidateAdded(address candidateAddress);
 
     event VoterAdded(address voterAddress);
+
+    event VoteAdded(address indexed voterAddress, address indexed refereeAddress, Vote vote);
+
+    event VoteStarted(uint endTime);
 }

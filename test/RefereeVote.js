@@ -151,15 +151,130 @@ contract('RefereeVote', function(accounts) {
 			});
 	}));
 
+	it("should allow a registered voter to vote (APPROVE)", redeploy(accounts[0], function(done, vote){
+		doSuccessfulVoteTest(done, vote, 0)
+	}));
+
+	it("should allow a registered voter to vote (DISAPPROVE)", redeploy(accounts[0], function(done, vote){
+		doSuccessfulVoteTest(done, vote, 1)
+	}));
+
+	var doSuccessfulVoteTest = function(done, vote, voteValue) {
+		startVote(vote)
+			.then(function() {
+				return vote.vote(accounts[1], voteValue, {from: accounts[4], gas: 3000000})
+			})
+			.then(function() {
+				var addedEvent = vote.VoteAdded({fromBlock: 0, toBlock: 'latest'});
+				addedEvent.get(function(err, logs) {
+					assert.equal(logs[0].args.voterAddress, accounts[4], "Vote not added correctly; Incorrect voter address");
+					assert.equal(logs[0].args.refereeAddress, accounts[1], "Vote not added correctly; Incorrect referee address");
+					assert.equal(logs[0].args.vote, voteValue, "Vote not added correctly; Incorrect vote");
+					done();
+				});
+			})
+			.catch(function(err) {
+				done(err);
+			});
+	};
+
+	it("should not allow a non-registered voter to vote", redeploy(accounts[0], function(done, vote){
+		startVote(vote)
+			.then(function() {
+				return vote.vote(accounts[1], {from: accounts[6], gas: 3000000})
+			})
+			.then(function() {
+				done("Allowed a non registered voter to vote");
+			})
+			.catch(function(err) {
+				//Error expected
+				done();
+			});
+	}));
+
+	it("should not allow a vote for a non-registered candidate", redeploy(accounts[0], function(done, vote){
+		startVote(vote)
+			.then(function() {
+				return vote.vote(accounts[6], {from: accounts[5], gas: 3000000})
+			})
+			.then(function() {
+				done("Allowed a vote for a non registered candidate");
+			})
+			.catch(function(err) {
+				//Error expected
+				done();
+			});
+	}));
+
+	it("should not allow a vote when in PRE_VOTE status", redeploy(accounts[0], function(done, vote){
+		populateVote(vote)
+			.then(function() {
+				return vote.vote(accounts[1], {from: accounts[4], gas: 3000000})
+			})
+			.then(function() {
+				done("Allowed a vote in PRE_VOTE status");
+			})
+			.catch(function(err) {
+				//Error expected
+				done();
+			});
+	}));
+
+	it("should complete referee vote if duration exceeded after a vote has been added", redeploy(accounts[0], function(done, vote){
+		startVote(vote)
+			.then(function() {
+				//86400 seconds in a day
+				return increaseTime(86400);
+			})
+			.then(function() {
+				return vote.vote(accounts[1], 0, {from: accounts[4], gas: 3000000});
+			})
+			.then(function() {
+				return vote.status.call();
+			})
+			.then(function(status) {
+				assert.equal(status, 2, "Vote not completed after duration exceeded");
+				done();
+			})
+			.catch(function(err) {
+				done(err);
+			})
+	}));
+
+	var populateVote = function(vote) {
+		return vote.addCandidate(accounts[1], {from: accounts[0], gas: 3000000})
+			.then(function() {
+				return vote.addCandidate(accounts[2], {from: accounts[0], gas: 3000000})
+			})
+			.then(function() {
+				return vote.addCandidate(accounts[3], {from: accounts[0], gas: 3000000})
+			})
+			.then(function() {
+				return vote.addVoter(accounts[4], {from: accounts[0], gas: 3000000})
+			})
+			.then(function() {
+				return vote.addVoter(accounts[5], {from: accounts[0], gas: 3000000})
+			});
+	}
+
+	var startVote = function(vote) {
+		return populateVote(vote)
+			.then(function() {
+				return vote.startVote( {from: accounts[0], gas: 3000000})
+			});
+	};
+
 });
 
 function increaseTime(increaseInSeconds) {
-	web3.currentProvider.sendAsync({
-		jsonrpc: "2.0",
-		method: "evm_increaseTime",
-		params: [increaseInSeconds],  // 86400 seconds in a day
-		id: new Date().getTime()
-	}, callback);
+	return new Promise(function(resolve) {
+		web3.currentProvider.sendAsync({
+			jsonrpc: "2.0",
+			method: "evm_increaseTime",
+			params: [increaseInSeconds],  // 86400 seconds in a day
+			id: new Date().getTime()
+		}, resolve);
+	});
 };
 
 function redeploy(deployer, testFunction) {
