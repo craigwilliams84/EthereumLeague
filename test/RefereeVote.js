@@ -84,6 +84,73 @@ contract('RefereeVote', function(accounts) {
 			});
 	}));
 
+	it("should allow the owner to add a voter when in PRE_VOTE state", redeploy(accounts[0], function(done, vote){
+		vote.addVoter(accounts[1], {from: accounts[0], gas: 3000000})
+			.then(function() {
+				var addedEvent = vote.VoterAdded({fromBlock: 0, toBlock: 'latest'});
+				addedEvent.get(function(err, logs) {
+					assert.equal(logs[0].args.voterAddress, accounts[1], "Voter not added correctly");
+					done();
+				});
+			})
+			.catch(function(err) {
+				done(err);
+			});
+	}));
+
+	it("should error when the owner tries to add a voter when in IN_PROGRESS state", redeploy(accounts[0], function(done, vote){
+		vote.startVote({from: accounts[0], gas: 3000000})
+			.then(function() {
+				return vote.addVoter(accounts[1], {from: accounts[0], gas: 3000000});
+			})
+			.then(function() {
+				done("Voter added successfully in incorrect state");
+			})
+			.catch(function(err) {
+				//Error expected
+				done();
+			});
+	}));
+
+	it("should error when a non owner tried to add a voter", redeploy(accounts[0], function(done, vote){
+		vote.addVoter(accounts[1], {from: accounts[2], gas: 3000000})
+			.then(function() {
+				done("Voter added from non owner");
+			})
+			.catch(function(err) {
+				//Error expected
+				done();
+			});
+	}));
+
+	it("should consider account to be a voter after adding", redeploy(accounts[0], function(done, vote){
+		vote.addVoter(accounts[1], {from: accounts[0], gas: 3000000})
+			.then(function() {
+				return vote.isVoter.call(accounts[1]);
+			})
+			.then(function(isVoter){
+				assert.equal(isVoter, true, "Account not considered to be a voter");
+				done();
+			})
+			.catch(function(err) {
+				done(err);
+			});
+	}));
+
+	it("should increment voter count after adding", redeploy(accounts[0], function(done, vote){
+		vote.addVoter(accounts[1], {from: accounts[0], gas: 3000000})
+			.then(function() {
+				return vote.voterCount.call();
+			})
+			.then(function(voterCount){
+				assert.equal(voterCount, 1, "Voter count not updated correctly");
+				done();
+			})
+			.catch(function(err) {
+				done(err);
+			});
+	}));
+
 });
 
 function increaseTime(increaseInSeconds) {

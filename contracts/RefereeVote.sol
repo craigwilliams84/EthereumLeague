@@ -15,12 +15,14 @@ contract RefereeVote is Ownable {
         address[] voters;
     }
 
-    address[] private refereeCandidates;
-    address[] public acceptedReferees;
     VoteStatus public status = VoteStatus.PRE_VOTE;
+    uint public voterCount = 0;
+
+    address[] private refereeCandidates;
+    address[] private acceptedReferees;
     mapping(address => VoteResult) private refereeVoteResults;
     mapping(address => VoterParticipationStatus) private voters;
-    uint private voterCount;
+
     uint8 private durationInDays;
     uint8 private acceptancePercentage;
     uint8 private maxVoters;
@@ -53,6 +55,8 @@ contract RefereeVote is Ownable {
         require(voterCount < maxVoters);
         voters[voterAddress] = VoterParticipationStatus.REGISTERED;
         voterCount++;
+
+        VoterAdded(voterAddress);
     }
 
     function vote(address refereeAddress, Vote vote) onlyRegistered onlyAtStatus(VoteStatus.IN_PROGRESS) {
@@ -78,8 +82,12 @@ contract RefereeVote is Ownable {
 
         return false;
     }
+    
+    function isVoter(address voterAddress) public returns (bool) {
+        return voters[voterAddress] == VoterParticipationStatus.REGISTERED;
+    }
 
-    function isCandidate(address refereeAddress) private returns (bool) {
+    function isCandidate(address refereeAddress) public returns (bool) {
         return refereeVoteResults[refereeAddress].added;
     }
 
@@ -121,4 +129,6 @@ contract RefereeVote is Ownable {
     }
 
     event CandidateAdded(address candidateAddress);
+
+    event VoterAdded(address voterAddress);
 }
