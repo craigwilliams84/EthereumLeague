@@ -102,13 +102,14 @@ contract RefereeVote is Ownable {
     }
 
     function setAcceptedReferees() private {
-        uint acceptanceThreshold = (voterCount * acceptancePercentage) / 100;
+        uint acceptanceThreshold = (voterCount * acceptancePercentage * 10) / 100;
 
         for (uint i = 0; i < refereeCandidates.length; i++) {
             VoteResult memory result = refereeVoteResults[refereeCandidates[i]];
 
-            if (result.approvalCount >= acceptanceThreshold) {
+            if (result.approvalCount * 10 >= acceptanceThreshold) {
                 acceptedReferees.push(refereeCandidates[i]);
+                RefereeAccepted(refereeCandidates[i]);
             }
         }
     }
@@ -139,4 +140,6 @@ contract RefereeVote is Ownable {
     event VoteAdded(address indexed voterAddress, address indexed refereeAddress, Vote vote);
 
     event VoteStarted(uint endTime);
+
+    event RefereeAccepted(address refereeAddress);
 }

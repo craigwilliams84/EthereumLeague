@@ -181,7 +181,7 @@ contract('RefereeVote', function(accounts) {
 	it("should not allow a non-registered voter to vote", redeploy(accounts[0], function(done, vote){
 		startVote(vote)
 			.then(function() {
-				return vote.vote(accounts[1], {from: accounts[6], gas: 3000000})
+				return vote.vote(accounts[1], {from: accounts[9], gas: 3000000})
 			})
 			.then(function() {
 				done("Allowed a non registered voter to vote");
@@ -241,6 +241,56 @@ contract('RefereeVote', function(accounts) {
 			})
 	}));
 
+	it("should select referees that received approvals over the acceptance percentage", redeploy(accounts[0], function(done, vote){
+		startVote(vote)
+			.then(function() {
+				return vote.vote(accounts[1], 0, {from: accounts[4], gas: 3000000})
+			})
+			.then(function() {
+				return vote.vote(accounts[1], 1, {from: accounts[5], gas: 3000000});
+			})
+			.then(function() {
+				return vote.vote(accounts[1], 1, {from: accounts[6], gas: 3000000});
+			})
+			.then(function() {
+				return vote.vote(accounts[2], 1, {from: accounts[4], gas: 3000000})
+			})
+			.then(function() {
+				return vote.vote(accounts[2], 0, {from: accounts[5], gas: 3000000});
+			})
+			.then(function() {
+				return vote.vote(accounts[2], 0, {from: accounts[6], gas: 3000000});
+			})
+			.then(function() {
+				return vote.vote(accounts[3], 0, {from: accounts[4], gas: 3000000})
+			})
+			.then(function() {
+				return vote.vote(accounts[3], 0, {from: accounts[5], gas: 3000000});
+			})
+			.then(function() {
+				return vote.vote(accounts[3], 0, {from: accounts[6], gas: 3000000});
+			})
+			.then(function() {
+				//86400 seconds in a day
+				return increaseTime(86400);
+			})
+			.then(function() {
+				return vote.completeVoteIfDurationExceeded({from: accounts[6], gas: 3000000});
+			})
+			.then(function() {
+				var acceptedEvent = vote.RefereeAccepted({fromBlock: 0, toBlock: 'latest'});
+				acceptedEvent.get(function(err, logs) {
+					assert.equal(logs[0].args.refereeAddress, accounts[2], "Account 2 not accepted");
+					assert.equal(logs[1].args.refereeAddress, accounts[3], "Account 3 not accepted");
+					assert.equal(logs.length, 2, "Incorrect number of referees accepted.");
+					done();
+				});
+			})
+			.catch(function(err) {
+				done(err);
+			})
+	}));
+
 	var populateVote = function(vote) {
 		return vote.addCandidate(accounts[1], {from: accounts[0], gas: 3000000})
 			.then(function() {
@@ -254,6 +304,9 @@ contract('RefereeVote', function(accounts) {
 			})
 			.then(function() {
 				return vote.addVoter(accounts[5], {from: accounts[0], gas: 3000000})
+			})
+			.then(function() {
+				return vote.addVoter(accounts[6], {from: accounts[0], gas: 3000000})
 			});
 	}
 
